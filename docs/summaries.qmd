@@ -1,0 +1,40 @@
+---
+title: "Summary tables and figures"
+author: 
+  - name: Dr. Marcus Beck, <mbeck@tbep.org>
+institute: "Tampa Bay Estuary Program"
+date: "`r Sys.Date()`"
+format:
+  html:
+    theme: cosmo
+    code-tools: 
+      source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/summaries.qmd
+execute:
+  echo: false
+  fig-height: 4
+  fig-width: 8
+  warning: false
+filters:
+  - lightbox
+
+lightbox: auto
+---
+  
+```{r}
+#| include: false
+library(knitr)
+library(here)
+library(reactable)
+
+load(file = here('tabs/taball.RData'))
+load(file = here('tabs/tab2021.RData'))
+```
+
+## GPRA
+
+```{r}
+taball
+tab2021
+```
+
+
