@@ -1,5 +1,5 @@
 ---
-title: "Summary tables and figures"
+title: "GPRA summary"
 author: 
   - name: Dr. Marcus Beck, <mbeck@tbep.org>
 institute: "Tampa Bay Estuary Program"
@@ -12,15 +12,13 @@ format:
     css: styles.css
 execute:
   echo: false
-  fig-height: 4
-  fig-width: 8
   warning: false
 filters:
   - lightbox
 
 lightbox: auto
 ---
-  
+
 ```{r}
 #| include: false
 library(knitr)
@@ -31,14 +29,20 @@ load(file = here('tabs/taball_2.RData'))
 load(file = here('tabs/tab2022_2.RData'))
 ```
 
-## GPRA
+::: panel-tabset
+## Tabular
 
 ```{r}
 taball_2
 ```
+
 <br>
+
 ```{r}
 tab2022_2
 ```
 
+## Figure
 
+![](../figs/cumulative.jpg)
+:::
