@@ -9,6 +9,7 @@ format:
     theme: cosmo
     code-tools: 
       source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/summaries.qmd
+    css: styles.css
 execute:
   echo: false
   fig-height: 4
@@ -26,15 +27,18 @@ library(knitr)
 library(here)
 library(reactable)
 
-load(file = here('tabs/taball.RData'))
-load(file = here('tabs/tab2021.RData'))
+load(file = here('tabs/taball_2.RData'))
+load(file = here('tabs/tab2022_2.RData'))
 ```
 
 ## GPRA
 
 ```{r}
-taball
-tab2021
+taball_2
+```
+<br>
+```{r}
+tab2022_2
 ```
 
 
