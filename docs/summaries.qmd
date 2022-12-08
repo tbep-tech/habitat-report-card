@@ -44,5 +44,5 @@ tab2022_2
 
 ## Figure
 
-![](../figs/cumulative.jpg)
+![](images/cumulative.png)
 :::

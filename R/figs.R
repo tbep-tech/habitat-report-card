@@ -89,6 +89,6 @@ p3 <- ggplot(toplo1, aes(x = Year, y = cummiles, fill = Activity)) +
 
 pout <- p1 + p2 + p3 + plot_layout(ncol = 1, guides = 'collect') & thm
 
-jpeg(here('figs/cumulative.jpg'), height = 7, width = 7, family = 'serif', units = 'in', res = 500)
+png(here('figs/cumulative.png'), height = 7, width = 7, family = 'serif', units = 'in', res = 500)
 print(pout)
 dev.off()
