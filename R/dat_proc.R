@@ -45,11 +45,15 @@ rstdatall <- bind_rows(rstdat, rstdat2) %>%
     `Linear Miles` = `Miles`,
     `Linear Ft` = `Feet`
   ) %>% 
+  rowwise() %>% 
   mutate(
+    Miles = sum(`Linear Miles`,  `Linear Ft` / 5280, na.rm = T),
     Activity = case_when(
       Activity %in% c('Establishment', 'Reestablishment', 'Restoration') ~ 'Restoration', 
       Activity %in% c('Enhancement', 'Maintenance', 'Protection', 'Rehabilitation') ~ 'Enhancement'
     )
-  )
+  ) %>% 
+  ungroup() %>% 
+  select(Year, Category, Activity, Acres, Miles)
 
 save(rstdatall, file = here('data/rstdatall.RData'))

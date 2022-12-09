@@ -13,11 +13,6 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
   
   # data prep
   rstsum <- dat %>% 
-    rowwise() %>% 
-    mutate(
-      Miles = sum(`Linear Miles`,  `Linear Ft` / 5280, na.rm = T)
-    ) %>% 
-    ungroup() %>% 
     filter(Year <= yrrng[2] & Year >= yrrng[1]) %>% 
     group_by(Category, Activity) %>% 
     summarise(

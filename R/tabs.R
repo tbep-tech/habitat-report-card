@@ -15,7 +15,7 @@ load(file = here('data/rstdatall.RData'))
 # HMPU compiled table -------------------------------------------------------------------------
 
 # all years
-taball <- rstdat_tab(rstdatall, yrrng = c(1971, 2022), family = fml)
+taball <- rstdat_tab(rstdatall, yrrng = c(2006, 2022), family = fml)
 
 # 2022
 tab2022 <- rstdat_tab(rstdatall, yrrng = 2022, family = fml)

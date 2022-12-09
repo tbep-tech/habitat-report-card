@@ -45,5 +45,28 @@ tab2022
 
 ## Figure
 
-![](images/cumulative.png)
+### Cumulative activity
+
+```{r}
+knitr::include_graphics(here('docs/figs/cumulative.png'))
+```
+
+### Cumulative habitat type
+
+```{r}
+knitr::include_graphics(here('docs/figs/cumulativehmp.png'))
+```
+
+### Total habitat type each year
+
+```{r}
+knitr::include_graphics(here('docs/figs/totalhmp.png'))
+```
+
+### Proportion habitat type each year
+
+```{r}
+knitr::include_graphics(here('docs/figs/prophmp.png'))
+```
+
 :::
