@@ -25,21 +25,22 @@ library(knitr)
 library(here)
 library(reactable)
 
-load(file = here('tabs/taball_2.RData'))
-load(file = here('tabs/tab2022_2.RData'))
+load(file = here('tabs/taball.RData'))
+load(file = here('tabs/tab2022.RData'))
 ```
 
 ::: panel-tabset
-## Tabular
+
+## Table
 
 ```{r}
-taball_2
+taball
 ```
 
 <br>
 
 ```{r}
-tab2022_2
+tab2022
 ```
 
 ## Figure
