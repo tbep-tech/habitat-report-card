@@ -69,4 +69,10 @@ knitr::include_graphics(here('docs/figs/totalhmp.png'))
 knitr::include_graphics(here('docs/figs/prophmp.png'))
 ```
 
+### Totals last three years
+
+```{r}
+knitr::include_graphics(here('docs/figs/totalhmprecent.png'))
+```
+
 :::
