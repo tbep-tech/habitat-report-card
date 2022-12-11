@@ -32,9 +32,16 @@ rstdat2 <- read_sheet('1QFX5XXpTgAr4u9wrxa_TUOuF5roUqEhJzZEDUiHi3SE')
 # https://docs.google.com/spreadsheets/d/1jYbODoAHXPqYC69fanINDoRkKmMl6oY9qltqdkC6UfM/edit#gid=741038946
 lkup <- read_sheet('1jYbODoAHXPqYC69fanINDoRkKmMl6oY9qltqdkC6UfM')
 
+# GRPA manually assigned lookup table
+# https://docs.google.com/spreadsheets/d/1bZtu4P1ji4pdSRcAnWSksHl1AJ-b3pFqxXedSdSHwBY/edit#gid=0
+lkupmanual <- read_sheet('1bZtu4P1ji4pdSRcAnWSksHl1AJ-b3pFqxXedSdSHwBY') %>% 
+  select(`View Detail`, `HMPU habitat 1`)
+
 # create input for table function
 rstdat2 <- rstdat2 %>% 
-  left_join(lkup, by = c('Habitat Type', 'Restoration Technique'))
+  left_join(lkup, by = c('Habitat Type', 'Restoration Technique')) %>% 
+  left_join(lkupmanual, by = 'View Detail') %>% 
+  unite('HMPU habitat 1', `HMPU habitat 1.x`, `HMPU habitat 1.y`, na.rm = T)
 
 rstdatall <- bind_rows(rstdat, rstdat2) %>% 
   select(
@@ -51,7 +58,8 @@ rstdatall <- bind_rows(rstdat, rstdat2) %>%
     Activity = case_when(
       Activity %in% c('Establishment', 'Reestablishment', 'Restoration') ~ 'Restoration', 
       Activity %in% c('Enhancement', 'Maintenance', 'Protection', 'Rehabilitation') ~ 'Enhancement'
-    )
+    ), 
+    Category = ifelse(Category == '', NA, Category)
   ) %>% 
   ungroup() %>% 
   select(Year, Category, Activity, Acres, Miles)

@@ -79,13 +79,14 @@ dev.off()
 levs <- c("Artificial Reefs", "Coastal Uplands", "Forested Freshwater Wetlands", 
           "Hard Bottom", "Intertidal Estuarine (Other)", "Living Shorelines", 
           "Low-Salinity Salt Marsh", "Mangrove Forests", "Non-forested Freshwater Wetlands", 
-          "Oyster Bars", "Seagrasses", "Tidal Tributaries", "Uplands (Non-coastal)")
+          "Oyster Bars", "Salt Barrens", "Seagrasses", "Tidal Tributaries", "Uplands (Non-coastal)")
 
 # data prep
 rstsum <- rstdatall %>% 
   arrange(Year, Category) %>% 
   filter(!is.na(Category)) %>%
   filter(Year >= 2006) %>% 
+  filter(!is.na(Category)) %>% 
   mutate(
     Category = factor(Category, levels = levs)
   ) %>% 
@@ -185,5 +186,38 @@ p3 <- ggplot(toplo1, aes(x = Year, y = Miles, fill = Category)) +
 pout <- p1 + p2 + p3 + plot_layout(ncol = 1, guides = 'collect') & thm & guides(fill = guide_legend(nrow = 5))
 
 png(here('docs/figs/prophmp.png'), height = 8, width = 7, family = 'serif', units = 'in', res = 500)
+print(pout)
+dev.off()
+
+p1 <- ggplot(toplo1, aes(x = Year, y = tot, fill = Category)) + 
+  scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
+  geom_area(position = 'stack', alpha = 0.8) + 
+  scale_fill_manual(values = colfun(length(unique(toplo1$Category)))) +
+  labs(
+    y = 'Projects', 
+    fill = NULL,
+  ) 
+
+p2 <- ggplot(toplo1, aes(x = Year, y = Acres, fill = Category)) + 
+  scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
+  geom_area(position = 'stack', alpha = 0.8) + 
+  scale_fill_manual(values = colfun(length(unique(toplo1$Category)))) +
+  labs(
+    y = 'Acres', 
+    fill = NULL,
+  ) 
+
+p3 <- ggplot(toplo1, aes(x = Year, y = Miles, fill = Category)) + 
+  scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
+  geom_area(position = 'stack', alpha = 0.8) + 
+  scale_fill_manual(values = colfun(length(unique(toplo1$Category)))) +
+  labs(
+    y = 'Miles', 
+    fill = NULL,
+  ) 
+
+pout <- p1 + p2 + p3 + plot_layout(ncol = 1, guides = 'collect') & thm & guides(fill = guide_legend(nrow = 5))
+
+png(here('docs/figs/totalhmp.png'), height = 8, width = 7, family = 'serif', units = 'in', res = 500)
 print(pout)
 dev.off()
