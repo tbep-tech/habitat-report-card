@@ -74,7 +74,7 @@ knitr::include_graphics(here('docs/figs/prophmp.png'))
 
 ## Figures, recent
 
-### Totals last three years
+### Totals 2022
 
 ```{r}
 knitr::include_graphics(here('docs/figs/bar2022.png'))
