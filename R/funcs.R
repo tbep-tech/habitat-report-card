@@ -47,19 +47,23 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
     rstsum, 
     columns = list(
       Category = colDef(name = 'Habitat', footer = 'Total',  minWidth = 200, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
-      tot = colDef(name = 'Total projects', minWidth = 120)
+      tot = colDef(name = 'Total projects', minWidth = 120, 
+                   format = colFormat(digits = 0))
     ),
     defaultColDef = colDef(
       footer = function(values){
         if(!is.numeric(values))
           return()
-        
-        formatC(round(sum(values), 0), format= "d", big.mark = ",")
+
+        if(any(!values %% 1 == 0))
+          formatC(sum(round(values, 1)), format= "f", big.mark = ",", digits = 1)
+        else
+          formatC(sum(values), format= "f", big.mark = ",", digits = 0)
         
       },
       headerStyle= list(fontSize = fntsz, fontFamily = family),
       footerStyle = list(fontWeight = "bold", fontSize = fntsz, fontFamily = family),
-      format = colFormat(digits = 0, separators = TRUE), 
+      format = colFormat(digits = 1, separators = TRUE), 
       minWidth = 150,
       style = list(fontSize = fntsz, fontFamily = family),
       resizable = TRUE
