@@ -46,7 +46,7 @@ taball
 tab2022
 ```
 
-## Figure
+## Figures, all years
 
 ### Cumulative activity
 
@@ -72,10 +72,24 @@ knitr::include_graphics(here('docs/figs/totalhmp.png'))
 knitr::include_graphics(here('docs/figs/prophmp.png'))
 ```
 
+## Figures, recent
+
 ### Totals last three years
 
 ```{r}
-knitr::include_graphics(here('docs/figs/totalhmprecent.png'))
+knitr::include_graphics(here('docs/figs/bar2022.png'))
+```
+
+### Total projects last three years, pie charts
+
+```{r}
+knitr::include_graphics(here('docs/figs/totalpie.png'))
+```
+
+### Total acres last three years, pie charts 
+
+```{r}
+knitr::include_graphics(here('docs/figs/acrespie.png'))
 ```
 
 :::
