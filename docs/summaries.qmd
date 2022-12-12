@@ -1,5 +1,5 @@
 ---
-title: "GPRA summary"
+title: "Habitat Restoration and Enhancement Project Summary"
 author: 
   - name: Dr. Marcus Beck, <mbeck@tbep.org>
 institute: "Tampa Bay Estuary Program"
@@ -10,6 +10,7 @@ format:
     code-tools: 
       source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/summaries.qmd
     css: styles.css
+
 execute:
   echo: false
   warning: false
@@ -28,6 +29,8 @@ library(reactable)
 load(file = here('tabs/taball.RData'))
 load(file = here('tabs/tab2022.RData'))
 ```
+
+Data are from USEPA Generalized Performance and Results Act, National Estuary Program Online Reporting Tool (GPRA/NEPORT), as reported by the Tampa Bay Estuary Program.
 
 ::: panel-tabset
 
