@@ -77,6 +77,42 @@ png(here('docs/figs/cumulative.png'), height = 7, width = 7, family = 'serif', u
 print(pout)
 dev.off()
 
+# cumulative projects, whole database ---------------------------------------------------------
+
+# data prep
+rstsum <- rstdatall %>% 
+  group_by(Year) %>% 
+  summarise(
+    tot= n(), 
+    .groups = 'drop'
+  ) %>% 
+  mutate(
+    cumtot = cumsum(tot)
+  ) 
+
+thm <- theme_minimal() + 
+  theme(
+    legend.position = 'top', 
+    axis.title.x = element_blank(), 
+    panel.grid.minor.y = element_blank()
+  )
+
+toplo1 <- rstsum
+
+p1 <- ggplot(toplo1, aes(x = Year, y = cumtot)) + 
+  # scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
+  geom_line() + 
+  geom_point() +
+  labs(
+    y = 'Cumulative projects', 
+    subtitle = paste(max(toplo1$cumtot), 'projects')
+  ) + 
+  thm
+
+png(here('docs/figs/cumulativehmpall.png'), height = 3, width = 7, family = 'serif', units = 'in', res = 500)
+print(p1)
+dev.off()
+
 # cumulative effort by habitat ----------------------------------------------------------------
 
 levs <- c("Artificial Reefs", "Coastal Uplands", "Forested Freshwater Wetlands", 

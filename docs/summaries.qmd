@@ -33,7 +33,6 @@ load(file = here('tabs/tab2022.RData'))
 Data are from USEPA Generalized Performance and Results Act, National Estuary Program Online Reporting Tool (GPRA/NEPORT), as reported by the Tampa Bay Estuary Program.
 
 ::: panel-tabset
-
 ## Table
 
 ```{r}
@@ -49,6 +48,10 @@ tab2022
 ## Figures, all years
 
 ### Cumulative activity
+
+```{r}
+knitr::include_graphics(here('docs/figs/cumulativehmpall.png'))
+```
 
 ```{r}
 knitr::include_graphics(here('docs/figs/cumulative.png'))
@@ -86,10 +89,9 @@ knitr::include_graphics(here('docs/figs/bar2022.png'))
 knitr::include_graphics(here('docs/figs/totalpie.png'))
 ```
 
-### Total acres last three years, pie charts 
+### Total acres last three years, pie charts
 
 ```{r}
 knitr::include_graphics(here('docs/figs/acrespie.png'))
 ```
-
 :::
