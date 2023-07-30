@@ -5,6 +5,7 @@ library(patchwork)
 library(plotrix)
 library(RColorBrewer)
 library(scales)
+library(tbeptools)
 
 load(file = here('data/rstdatall.RData'))
 
@@ -458,3 +459,10 @@ p <- p1 + p2 + p3 + plot_layout(ncol = 3)
 png(here('docs/figs/bar2022.png'), height = 5, width = 8, family = 'serif', units = 'in', res = 500)
 print(p)
 dev.off()
+
+# HMP report cards ----------------------------------------------------------------------------
+
+# show_hmpreport(acres, subtacres, hmptrgs, typ = "targets", ycollapse = TRUE, strata = 'Subtidal', text = 3)
+# 
+# show_hmpreport(acres, subtacres, hmptrgs, typ = "targets", ycollapse = TRUE, strata = c('Intertidal', 'Supratidal'), text = 3)
+

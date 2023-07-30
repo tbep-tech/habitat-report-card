@@ -81,3 +81,34 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
   return(out)
   
 }
+
+# get datasets from hmpu-workflow repo
+# try simple load, download if fail
+rdataload <- function(x){
+  
+  fl <- paste0(x, '.RData')
+  dataurl <- 'https://github.com/tbep-tech/hmpu-workflow/raw/master/data/'
+  flurl <- paste0(dataurl, fl)
+  
+  # try simple load
+  ld <- try(load(url(flurl)), silent = T)
+  
+  # return x if load worked
+  if(!inherits(ld, 'try-error')){
+    out <- get(x)
+  }
+  
+  # download x if load failed
+  if(inherits(ld, 'try-error')){
+    
+    fl <- paste(tempdir(), fl, sep = '/')
+    download.file(flurl, destfile = fl, quiet = T)
+    load(file = fl)
+    out <- get(x)
+    suppressMessages(file.remove(fl))
+    
+  }
+  
+  return(out)
+    
+}
