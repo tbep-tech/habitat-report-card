@@ -49,11 +49,12 @@ trgs <- rdataload('trgs')
 restorelyr <- rdataload('restorelyr')
 
 # make table
-cap <- 'Summary of the Recommended 2030 Targets and 2050 Goals'
+cap <- ''
 tabsub <- target_fun(lulc, subt, hard, arti, tidt, livs, coastal, fluccs, strata, restorelyr, trgs, 
-                     cap, stratsel = 'Subtidal')
-tabnotsub <- target_fun(lulc, subt, hard, arti, tidt, livs, coastal, fluccs, strata, restorelyr, trgs, 
-                        cap, stratsel = 'Not Subtidal')
-
+                     cap, stratsel = 'Subtidal', typ = 'targets')
+tabint <- target_fun(lulc, subt, hard, arti, tidt, livs, coastal, fluccs, strata, restorelyr, trgs, 
+                        cap, stratsel = 'Intertidal', typ = 'targets')
+tabsup <- target_fun(lulc, subt, hard, arti, tidt, livs, coastal, fluccs, strata, restorelyr, trgs, 
+                     cap, stratsel = 'Supratidal', typ = 'targets')
 # save_as_html(tab, path = 'docs/target_table.html', title = 'Target Table')
 
