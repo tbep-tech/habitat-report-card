@@ -15,6 +15,8 @@ fml <- "roboto"
 
 source(here('R/funcs.R'))
 
+cur <- 2023
+
 # cumulative effort ---------------------------------------------------------------------------
 
 # data prep
@@ -330,11 +332,8 @@ rstsum <- rstdatall %>%
     allmiles = sum(Miles)
   ) 
 
-
-cols <- qualitative_hcl(length(unique(tnanndat$SOURCE)), palette = "Dynamic")
-
 toplo <- rstsum %>% 
-  filter(Year >= 2020) %>% 
+  filter(Year >= (cur - 2)) %>% 
   mutate(
     allacres2 = formatC(round(allacres, 1), format= "f", big.mark = ",", digits = 1), 
     allmiles2 = formatC(round(allmiles, 1), format= "f", big.mark = ",", digits = 1)
@@ -394,10 +393,10 @@ png(here('docs/figs/milespie.png'), height = 4, width = 7, family = 'serif', uni
 print(p)
 dev.off()
 
-# 2022 only -----------------------------------------------------------------------------------
+# cur only ------------------------------------------------------------------------------------
 
 toplo <- rstsum %>% 
-  filter(Year == 2022) %>% 
+  filter(Year == cur) %>% 
   mutate(
     Category = reorder(Category, tot),
     acreslab = formatC(round(Acres, 1), big.mark = ",", format = 'f', digits = 1), 
@@ -456,7 +455,7 @@ p3 <- ggplot(toplo, aes(x = Miles, y = Category, fill = Category)) +
 p <- p1 + p2 + p3 + plot_layout(ncol = 3)
 
 
-png(here('docs/figs/bar2022.png'), height = 5, width = 8, family = 'serif', units = 'in', res = 500)
+png(here('docs/figs/barcur.png'), height = 5, width = 8, family = 'serif', units = 'in', res = 500)
 print(p)
 dev.off()
 

@@ -15,17 +15,18 @@ source(here('R/funcs.R'))
 
 load(file = here('data/rstdatall.RData'))
 
+cur <- 2023
+
 # HMPU compiled table -------------------------------------------------------------------------
 
 # all years
-taball <- rstdat_tab(rstdatall, yrrng = c(2006, 2022), family = fml)
+taball <- rstdat_tab(rstdatall, yrrng = c(2006, cur), family = fml)
 
-# 2022
-tab2022 <- rstdat_tab(rstdatall, yrrng = 2022, family = fml)
+# current year
+tabcur <- rstdat_tab(rstdatall, yrrng = cur, family = fml)
 
 save(taball, file = here('tabs/taball.RData'))
-save(tab2022, file = here('tabs/tab2022.RData'))
-
+save(tabcur, file = here('tabs/tabcur.RData'))
 
 # hmpu targets/goals tables by subtidal, not subtidal -----------------------------------------
 

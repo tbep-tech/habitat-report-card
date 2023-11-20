@@ -10,10 +10,11 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
     sort() %>% 
     c(., 'Mix/undocumented') %>% 
     tibble(Category = . )
-  
+
   # data prep
   rstsum <- dat %>% 
     filter(Year <= yrrng[2] & Year >= yrrng[1]) %>% 
+    filter(!is.na(Activity)) %>% 
     group_by(Category, Activity) %>% 
     summarise(
       tot= n(),
@@ -28,7 +29,10 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
     ungroup() %>% 
     pivot_longer(c('Acres', 'Miles'), names_to = 'var', values_to = 'val') %>% 
     unite('var', Activity, var, sep = ', ') %>% 
-    pivot_wider(names_from = 'var', values_from = 'val', values_fill = 0) %>% 
+    mutate(
+      var = factor(var, levels = c('Restoration, Acres', 'Restoration, Miles', 'Enhancement, Acres', 'Enhancement, Miles'))
+    ) %>% 
+    pivot_wider(names_from = 'var', values_from = 'val', values_fill = 0, names_expand = T) %>% 
     select(Category, tot, `Restoration, Acres`, `Restoration, Miles`, `Enhancement, Acres`, `Enhancement, Miles`) %>% 
     mutate(
       Category = ifelse(is.na(Category), 'Mix/undocumented', Category)

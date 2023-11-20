@@ -27,7 +27,8 @@ library(here)
 library(reactable)
 
 load(file = here('tabs/taball.RData'))
-load(file = here('tabs/tab2022.RData'))
+load(file = here('tabs/tabcur.RData'))
+cur <- gsub('^.*2006-|)</h5>', '', taball$prepend[[1]])
 ```
 
 Data are from USEPA Generalized Performance and Results Act, National Estuary Program Online Reporting Tool (GPRA/NEPORT), as reported by the Tampa Bay Estuary Program.
@@ -42,7 +43,7 @@ taball
 <br>
 
 ```{r}
-tab2022
+tabcur
 ```
 
 ## Figures, all years
@@ -77,10 +78,10 @@ knitr::include_graphics(here('docs/figs/prophmp.png'))
 
 ## Figures, recent
 
-### Totals 2022
+### Totals `r cur`
 
 ```{r}
-knitr::include_graphics(here('docs/figs/bar2022.png'))
+knitr::include_graphics(here('docs/figs/barcur.png'))
 ```
 
 ### Total projects last three years, pie charts
