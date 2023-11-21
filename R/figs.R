@@ -30,6 +30,7 @@ rstsum <- rstdatall %>%
     Miles = sum(Miles, na.rm = T),
     .groups = 'drop'
   ) %>% 
+  complete(Year, Activity, fill = list(tot = 0, Acres = 0, Miles = 0)) %>%
   group_by(Activity) %>% 
   mutate(
     cumtot = cumsum(tot),
