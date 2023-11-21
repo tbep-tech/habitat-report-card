@@ -18,29 +18,84 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
     filter(Year <= yrrng[2] & Year >= yrrng[1]) %>% 
     filter(!is.na(Activity)) %>% 
     filter(Activity != 'Protection') %>% 
-    group_by(Category, Activity) %>% 
     summarise(
       tot= n(),
       Acres = sum(Acres, na.rm = T), 
       Miles = sum(Miles, na.rm = T),
-      .groups = 'drop'
+      .by = c('Category', 'Activity')
     ) %>% 
-    group_by(Category) %>% 
     mutate(
-      tot = sum(tot)
-    ) %>% 
-    ungroup() %>% 
-    pivot_longer(c('Acres', 'Miles'), names_to = 'var', values_to = 'val') %>% 
-    unite('var', Activity, var, sep = ', ') %>% 
+      tot = sum(tot), 
+      .by = Category
+    ) %>%
     mutate(
-      var = factor(var, levels = c('Restoration, Acres', 'Restoration, Miles', 'Enhancement, Acres', 'Enhancement, Miles'))
+      Category = factor(Category, levels = allhab$Category)
     ) %>% 
-    pivot_wider(names_from = 'var', values_from = 'val', values_fill = 0, names_expand = T) %>% 
-    select(Category, tot, `Restoration, Acres`, `Restoration, Miles`, `Enhancement, Acres`, `Enhancement, Miles`) %>% 
-    left_join(allhab, ., by = 'Category') %>% 
-    rowwise() %>% 
-    mutate_all(function(x) ifelse(is.na(x), 0, x))
+    complete(Category, Activity, fill = list(tot = 0, Acres = 0, Miles = 0)) %>% 
+    mutate(
+      tot = max(tot), 
+      .by = Category
+    ) %>% 
+    mutate(
+      Category = as.character(Category)
+    )
+    
+  # total projects
+  totproj <- rstsum %>% 
+    select(Category, tot) %>% 
+    unique() %>% 
+    pull(tot) %>% 
+    sum() %>% 
+    tibble(
+      Category = 'Total',
+      tot = .
+      )
 
+  # totals from rstsum
+  tots <- rstsum %>% 
+    pivot_longer(cols = c('Acres', 'Miles'), names_to = 'var', values_to = 'val') %>%
+    summarise(
+      val = sum(val, na.rm = T),
+      .by = c(Activity, var)
+    ) %>%
+    mutate(
+      val = case_when(
+        val < 1 & val > 0 ~ '< 1', 
+        T ~ format(round(val, 0), big.mark = ',', trim = T)
+      ), 
+      Activity = factor(Activity, levels = c('Restoration', 'Enhancement'),
+                        labels = c('Restoration (Acres / Miles)', 'Enhancement (Acres / Miles)')
+      )
+    ) %>% 
+    pivot_wider(names_from = 'var', values_from = 'val', values_fill = '0', names_expand = T) %>%
+    unite('val', Acres, Miles, sep = ' / ') %>% 
+    pivot_wider(names_from = 'Activity', values_from = 'val', values_fill = '0 / 0', names_expand = T) %>% 
+    bind_cols(totproj, .)
+  
+  # combine all    
+  totab <- rstsum %>% 
+    mutate(
+      Acres = case_when(
+        Acres < 1 & Acres > 0 ~ '< 1', 
+        T ~ format(round(Acres, 0), big.mark = ',', trim = T)
+      ),
+      Miles = case_when(
+        Miles < 1 & Miles > 0 ~ '< 1', 
+        T ~ format(round(Miles, 0), big.mark = ',', trim = T)
+      )
+    ) %>%
+    unite('val', Acres, Miles, sep = ' / ') %>% 
+    mutate(
+      Activity = factor(Activity, levels = c('Restoration', 'Enhancement'),
+                        labels = c('Restoration (Acres / Miles)', 'Enhancement (Acres / Miles)')
+      )
+    ) %>% 
+    pivot_wider(names_from = 'Activity', values_from = 'val', values_fill = '0 / 0', names_expand = T) %>% 
+    select(Category, tot, `Restoration (Acres / Miles)`, `Enhancement (Acres / Miles)`) %>% 
+    left_join(allhab, ., by = 'Category')  %>% 
+    bind_rows(tots) %>% 
+    mutate(tot = as.character(tot))
+  
   # yrrng
   yrs <- yrrng %>% 
     unique %>% 
@@ -48,31 +103,23 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
   
   # table
   tab <- reactable(
-    rstsum, 
+    totab, 
     columns = list(
-      Category = colDef(name = 'Habitat', footer = 'Total',  minWidth = 200, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
-      tot = colDef(name = 'Total projects', minWidth = 120, 
-                   format = colFormat(digits = 0))
+      Category = colDef(name = 'Habitat', minWidth = 180, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
+      tot = colDef(name = 'Total projects', minWidth = 80)
     ),
     defaultColDef = colDef(
-      footer = function(values){
-        if(!is.numeric(values))
-          return()
-
-        if(any(!values %% 1 == 0))
-          formatC(sum(round(values, 1)), format= "f", big.mark = ",", digits = 1)
-        else
-          formatC(sum(values), format= "f", big.mark = ",", digits = 0)
-        
-      },
       headerStyle= list(fontSize = fntsz, fontFamily = family),
-      footerStyle = list(fontWeight = "bold", fontSize = fntsz, fontFamily = family),
-      format = colFormat(digits = 1, separators = TRUE), 
       minWidth = 150,
-      style = list(fontSize = fntsz, fontFamily = family),
-      resizable = TRUE
+      resizable = TRUE,
+      style = function(value, index) {
+        if (index == nrow(totab))
+          list(fontWeight = "bold", fontSize = fntsz, fontFamily = family)
+        else
+          list(fontSize = fntsz, fontFamily = family)
+      }
     ),
-    defaultPageSize = nrow(rstsum),
+    defaultPageSize = nrow(totab),
     showPageSizeOptions = F,
     highlight = T,
     wrap = F
