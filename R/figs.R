@@ -131,7 +131,7 @@ rstsum <- rstdatall %>%
   arrange(Year, Category) %>% 
   filter(!is.na(Category)) %>%
   filter(Year >= 2006) %>% 
-  filter(!is.na(Category)) %>% 
+  filter(Category %in% levs) %>% 
   mutate(
     Category = factor(Category, levels = levs)
   ) %>% 
@@ -195,42 +195,6 @@ p3 <- ggplot(toplo1, aes(x = Year, y = cummiles, fill = Category)) +
 pout <- p1 + p2 + p3 + plot_layout(ncol = 1, guides = 'collect') & thm & guides(fill = guide_legend(nrow = 5))
 
 png(here('docs/figs/cumulativehmp.png'), height = 8, width = 7, family = 'serif', units = 'in', res = 500)
-print(pout)
-dev.off()
-
-p1 <- ggplot(toplo1, aes(x = Year, y = tot, fill = Category)) + 
-  scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year)), expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  geom_area(position = 'fill', alpha = 0.8) + 
-  scale_fill_manual(values = colfun(ncol)) +
-  labs(
-    y = 'Projects', 
-    fill = NULL,
-  ) 
-
-p2 <- ggplot(toplo1, aes(x = Year, y = Acres, fill = Category)) + 
-  scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year)), expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  geom_area(position = 'fill', alpha = 0.8) + 
-  scale_fill_manual(values = colfun(ncol)) +
-  labs(
-    y = 'Acres', 
-    fill = NULL,
-  ) 
-
-p3 <- ggplot(toplo1, aes(x = Year, y = Miles, fill = Category)) + 
-  scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year)), expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  geom_area(position = 'fill', alpha = 0.8) + 
-  scale_fill_manual(values = colfun(ncol)) +
-  labs(
-    y = 'Miles', 
-    fill = NULL,
-  ) 
-
-pout <- p1 + p2 + p3 + plot_layout(ncol = 1, guides = 'collect') & thm & guides(fill = guide_legend(nrow = 5))
-
-png(here('docs/figs/prophmp.png'), height = 8, width = 7, family = 'serif', units = 'in', res = 500)
 print(pout)
 dev.off()
 
@@ -312,7 +276,7 @@ cols <- colorRampPalette(brewer.pal(8, "Accent"))(length(levs))
 # data prep
 rstsum <- rstdatall %>% 
   arrange(Year, Category) %>% 
-  filter(!is.na(Category)) %>%
+  filter(Category %in% levs) %>%
   filter(Year >= 2006) %>% 
   filter(!is.na(Category)) %>% 
   mutate(
@@ -359,23 +323,6 @@ p <- ggplot(toplo, aes(x = alltot/2, y = tot, fill = Category, width = alltot)) 
   guides(fill = guide_legend(nrow = 5))
 
 png(here('docs/figs/totalpie.png'), height = 4, width = 7, family = 'serif', units = 'in', res = 500)
-print(p)
-dev.off()
-
-p <- ggplot(toplo, aes(x = allacres/2, y = Acres, fill = Category, width = allacres)) +
-  geom_bar(position = "fill", stat="identity", color = 'black') +
-  facet_wrap(~ Yearacres, strip.position = 'bottom') + 
-  coord_polar("y") +
-  scale_fill_manual(values = cols) +
-  theme_void() +
-  theme(
-    legend.title = element_blank(), 
-    legend.position = 'top', 
-    strip.text = element_text(size = 12)
-  ) +
-  guides(fill = guide_legend(nrow = 5))
-
-png(here('docs/figs/acrespie.png'), height = 4, width = 7, family = 'serif', units = 'in', res = 500)
 print(p)
 dev.off()
 

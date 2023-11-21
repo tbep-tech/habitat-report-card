@@ -70,12 +70,6 @@ knitr::include_graphics(here('docs/figs/cumulativehmp.png'))
 knitr::include_graphics(here('docs/figs/totalhmp.png'))
 ```
 
-### Proportion habitat type each year
-
-```{r}
-knitr::include_graphics(here('docs/figs/prophmp.png'))
-```
-
 ## Figures, recent
 
 ### Totals `r cur`
@@ -90,9 +84,4 @@ knitr::include_graphics(here('docs/figs/barcur.png'))
 knitr::include_graphics(here('docs/figs/totalpie.png'))
 ```
 
-### Total acres last three years, pie charts
-
-```{r}
-knitr::include_graphics(here('docs/figs/acrespie.png'))
-```
 :::
