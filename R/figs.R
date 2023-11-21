@@ -128,24 +128,24 @@ levs <- c("Artificial Reefs", "Coastal Uplands", "Forested Freshwater Wetlands",
 
 # data prep
 rstsum <- rstdatall %>% 
-  arrange(Year, Category) %>% 
-  filter(!is.na(Category)) %>%
+  arrange(Year, Primary) %>% 
+  filter(!is.na(Primary)) %>%
   filter(Year >= 2006) %>% 
-  filter(Category %in% levs) %>% 
+  filter(Primary %in% levs) %>% 
   mutate(
-    Category = factor(Category, levels = levs)
+    Primary = factor(Primary, levels = levs)
   ) %>% 
   select(-Activity) %>% 
   mutate(prj = 1) %>% 
-  tidyr::complete(Year, Category, fill = list(Acres = 0, Miles = 0, prj = 0)) %>% 
-  group_by(Year, Category) %>% 
+  tidyr::complete(Year, Primary, fill = list(Acres = 0, Miles = 0, prj = 0)) %>% 
+  group_by(Year, Primary) %>% 
   summarise(
     tot = sum(prj),
     Acres = sum(Acres, na.rm = T),
     Miles = sum(Miles, na.rm = T),
     .groups = 'drop'
   ) %>% 
-  group_by(Category) %>% 
+  group_by(Primary) %>% 
   mutate(
     cumtot = cumsum(tot),
     cumacres = cumsum(Acres),
@@ -161,11 +161,11 @@ thm <- theme_minimal() +
   )
 
 toplo1 <- rstsum
-ncol <- length(levels(toplo1$Category))
+ncol <- length(levels(toplo1$Primary))
 
 colfun <- colorRampPalette(brewer.pal(8, "Accent"))
 
-p1 <- ggplot(toplo1, aes(x = Year, y = cumtot, fill = Category)) + 
+p1 <- ggplot(toplo1, aes(x = Year, y = cumtot, fill = Primary)) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
   geom_area(position = 'stack', alpha = 0.8) + 
   scale_fill_manual(values = colfun(ncol)) +
@@ -174,7 +174,7 @@ p1 <- ggplot(toplo1, aes(x = Year, y = cumtot, fill = Category)) +
     fill = NULL,
   ) 
 
-p2 <- ggplot(toplo1, aes(x = Year, y = cumacres, fill = Category)) + 
+p2 <- ggplot(toplo1, aes(x = Year, y = cumacres, fill = Primary)) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
   geom_area(position = 'stack', alpha = 0.8) + 
   scale_fill_manual(values = colfun(ncol)) +
@@ -183,7 +183,7 @@ p2 <- ggplot(toplo1, aes(x = Year, y = cumacres, fill = Category)) +
     fill = NULL,
   ) 
 
-p3 <- ggplot(toplo1, aes(x = Year, y = cummiles, fill = Category)) + 
+p3 <- ggplot(toplo1, aes(x = Year, y = cummiles, fill = Primary)) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
   geom_area(position = 'stack', alpha = 0.8) + 
   scale_fill_manual(values = colfun(ncol)) +
@@ -198,7 +198,7 @@ png(here('docs/figs/cumulativehmp.png'), height = 8, width = 7, family = 'serif'
 print(pout)
 dev.off()
 
-p1 <- ggplot(toplo1, aes(x = Year, y = tot, fill = Category)) + 
+p1 <- ggplot(toplo1, aes(x = Year, y = tot, fill = Primary)) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
   geom_area(position = 'stack', alpha = 0.8) + 
   scale_fill_manual(values = colfun(ncol)) +
@@ -207,7 +207,7 @@ p1 <- ggplot(toplo1, aes(x = Year, y = tot, fill = Category)) +
     fill = NULL,
   ) 
 
-p2 <- ggplot(toplo1, aes(x = Year, y = Acres, fill = Category)) + 
+p2 <- ggplot(toplo1, aes(x = Year, y = Acres, fill = Primary)) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
   geom_area(position = 'stack', alpha = 0.8) + 
   scale_fill_manual(values = colfun(ncol)) +
@@ -216,7 +216,7 @@ p2 <- ggplot(toplo1, aes(x = Year, y = Acres, fill = Category)) +
     fill = NULL,
   ) 
 
-p3 <- ggplot(toplo1, aes(x = Year, y = Miles, fill = Category)) + 
+p3 <- ggplot(toplo1, aes(x = Year, y = Miles, fill = Primary)) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
   geom_area(position = 'stack', alpha = 0.8) + 
   scale_fill_manual(values = colfun(ncol)) +
@@ -233,9 +233,9 @@ dev.off()
 
 toplo2 <- toplo1 %>% 
   filter(Year >= 2020)
-ncol <- length(levels(toplo2$Category))
+ncol <- length(levels(toplo2$Primary))
 
-p1 <- ggplot(toplo2, aes(x = Year, y = tot, fill = Category)) + 
+p1 <- ggplot(toplo2, aes(x = Year, y = tot, fill = Primary)) + 
   geom_bar(position = 'stack', stat = 'identity', alpha = 0.8) + 
   scale_fill_manual(values = colfun(ncol)) +
   labs(
@@ -243,7 +243,7 @@ p1 <- ggplot(toplo2, aes(x = Year, y = tot, fill = Category)) +
     fill = NULL,
   ) 
 
-p2 <- ggplot(toplo2, aes(x = Year, y = Acres, fill = Category)) + 
+p2 <- ggplot(toplo2, aes(x = Year, y = Acres, fill = Primary)) + 
   geom_bar(position = 'stack', stat = 'identity', alpha = 0.8) + 
   scale_fill_manual(values = colfun(ncol)) +
   labs(
@@ -251,7 +251,7 @@ p2 <- ggplot(toplo2, aes(x = Year, y = Acres, fill = Category)) +
     fill = NULL,
   ) 
 
-p3 <- ggplot(toplo2, aes(x = Year, y = Miles, fill = Category)) + 
+p3 <- ggplot(toplo2, aes(x = Year, y = Miles, fill = Primary)) + 
   geom_bar(position = 'stack', stat = 'identity', alpha = 0.8) + 
   scale_fill_manual(values = colfun(ncol)) +
   labs(
@@ -275,17 +275,17 @@ cols <- colorRampPalette(brewer.pal(8, "Accent"))(length(levs))
 
 # data prep
 rstsum <- rstdatall %>% 
-  arrange(Year, Category) %>% 
-  filter(Category %in% levs) %>%
+  arrange(Year, Primary) %>% 
+  filter(Primary %in% levs) %>%
   filter(Year >= 2006) %>% 
-  filter(!is.na(Category)) %>% 
+  filter(!is.na(Primary)) %>% 
   mutate(
-    Category = factor(Category, levels = levs)
+    Primary = factor(Primary, levels = levs)
   ) %>% 
   select(-Activity) %>% 
   mutate(prj = 1) %>% 
-  tidyr::complete(Year, Category, fill = list(Acres = 0, Miles = 0, prj = 0)) %>% 
-  group_by(Year, Category) %>% 
+  tidyr::complete(Year, Primary, fill = list(Acres = 0, Miles = 0, prj = 0)) %>% 
+  group_by(Year, Primary) %>% 
   summarise(
     tot = sum(prj),
     Acres = sum(Acres, na.rm = T),
@@ -309,7 +309,7 @@ toplo <- rstsum %>%
   unite('Yearacres', Year, allacres2, sep = ': ', remove = F) %>% 
   unite('Yearmiles', Year, allmiles2, sep = ': ', remove = F)
 
-p <- ggplot(toplo, aes(x = alltot/2, y = tot, fill = Category, width = alltot)) +
+p <- ggplot(toplo, aes(x = alltot/2, y = tot, fill = Primary, width = alltot)) +
   geom_bar(position = "fill", stat="identity", color = 'black') +
   facet_wrap(~ Yeartot, strip.position = 'bottom') + 
   coord_polar("y") +
@@ -326,7 +326,7 @@ png(here('docs/figs/totalpie.png'), height = 4, width = 7, family = 'serif', uni
 print(p)
 dev.off()
 
-p <- ggplot(toplo, aes(x = allmiles/2, y = Miles, fill = Category, width = allmiles)) +
+p <- ggplot(toplo, aes(x = allmiles/2, y = Miles, fill = Primary, width = allmiles)) +
   geom_bar(position = "fill", stat="identity", color = 'black') +
   facet_wrap(~ Yearmiles, strip.position = 'bottom') + 
   coord_polar("y") +
@@ -348,7 +348,7 @@ dev.off()
 toplo <- rstsum %>% 
   filter(Year == cur) %>% 
   mutate(
-    Category = reorder(Category, tot),
+    Primary = reorder(Primary, tot),
     acreslab = formatC(round(Acres, 1), big.mark = ",", format = 'f', digits = 1), 
     acreslab = gsub('\\.0$', '', acreslab)
   )
@@ -366,7 +366,7 @@ thm <- theme_minimal() +
     panel.background = element_rect(fill = alpha('grey', 0.1), color = NA)
   )
 
-p1 <- ggplot(toplo, aes(x = tot, y = Category, fill = Category)) + 
+p1 <- ggplot(toplo, aes(x = tot, y = Primary, fill = Primary)) + 
   geom_bar(stat = 'identity') + 
   geom_text(aes(label = tot), hjust = 0, nudge_x = 0.5) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$tot) * 1.18)) +
@@ -377,7 +377,7 @@ p1 <- ggplot(toplo, aes(x = tot, y = Category, fill = Category)) +
     x = 'Total projects'
   )
   
-p2 <- ggplot(toplo, aes(x = Acres, y = Category, fill = Category)) + 
+p2 <- ggplot(toplo, aes(x = Acres, y = Primary, fill = Primary)) + 
   geom_bar(stat = 'identity') + 
   geom_text(aes(label = acreslab), hjust = 0, nudge_x = 1000) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Acres) * 1.55), labels = comma) +
@@ -389,7 +389,7 @@ p2 <- ggplot(toplo, aes(x = Acres, y = Category, fill = Category)) +
     x = 'Total Acres'
   )
 
-p3 <- ggplot(toplo, aes(x = Miles, y = Category, fill = Category)) + 
+p3 <- ggplot(toplo, aes(x = Miles, y = Primary, fill = Primary)) + 
   geom_bar(stat = 'identity') + 
   geom_text(aes(label = round(Miles, 2)), hjust = 0, nudge_x = 0.005) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Miles) * 1.3)) +

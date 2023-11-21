@@ -26,9 +26,11 @@ library(knitr)
 library(here)
 library(reactable)
 
-load(file = here('tabs/taball.RData'))
-load(file = here('tabs/tabcur.RData'))
-cur <- gsub('^.*2006-|)</h5>', '', taball$prepend[[1]])
+load(file = here('tabs/pritaball.RData'))
+load(file = here('tabs/gentaball.RData'))
+load(file = here('tabs/pritabcur.RData'))
+load(file = here('tabs/gentabcur.RData'))
+cur <- gsub('^.*\\(|\\)</h5>', '', gentabcur$prepend[[1]])
 ```
 
 Data are from USEPA Generalized Performance and Results Act, National Estuary Program Online Reporting Tool (GPRA/NEPORT), as reported by the Tampa Bay Estuary Program.
@@ -36,14 +38,30 @@ Data are from USEPA Generalized Performance and Results Act, National Estuary Pr
 ::: panel-tabset
 ## Table
 
+::: {.callout-note collapse="true"}
+Summaries by primary habitat do not include "Protection" activities, which may include additional unnatural habitat categories not evaluated by the TBEP Habitat Master Plan.  Primary habitat summaries are also only possible from 2006 to present.
+:::
+
 ```{r}
-taball
+pritaball
 ```
 
 <br>
 
 ```{r}
-tabcur
+gentaball
+```
+
+<br>
+
+```{r}
+pritabcur
+```
+
+<br>
+
+```{r}
+gentabcur
 ```
 
 ## Figures, all years

@@ -1,53 +1,75 @@
-# gpra database projects table
-rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
+# gpra database projects table by habitat type (rowgrp)
+tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'General')){
 
+  rowgrp <- match.arg(rowgrp)
+  
+  dat <- dat %>% 
+    rename(rowgrp = !!rowgrp)
+  
   if(length(yrrng) == 1)
     yrrng <- rep(yrrng, 2)
-
+  
   # habitat categories
   allhab <- dat %>% 
-    pull(`Category`) %>% 
+    pull(`rowgrp`) %>% 
     unique() %>% 
-    sort() %>% 
-    .[!. %in% 'Other'] %>% 
-    c(., 'Other') %>% 
-    tibble(Category = . )
+    sort() %>%
+    tibble(rowgrp = .)
+  
+  collevs <- c('Restoration', 'Enhancement', 'Protection')
+  collabs <- c('Restoration (Ac / Mi)', 'Enhancement (Ac / Mi)', 'Protection (Ac / Mi)')
+  
+  # only unique step for primary habitat categories
+  if(rowgrp == 'Primary'){
+    
+    allhab <- allhab %>% 
+      pull(rowgrp) %>% 
+      .[!. %in% 'Other'] %>% 
+      c(., 'Other') %>% 
+      tibble(rowgrp = . )
 
+    dat <- dat %>% 
+      filter(Activity != 'Protection')
+    
+    collevs <- grep('Restoration|Enhancement', collevs, value = T)
+    collabs <- grep('Restoration|Enhancement', collabs, value = T)
+    
+  }
+    
   # data prep
   rstsum <- dat %>% 
     filter(Year <= yrrng[2] & Year >= yrrng[1]) %>% 
     filter(!is.na(Activity)) %>% 
-    filter(Activity != 'Protection') %>% 
     summarise(
       tot= n(),
       Acres = sum(Acres, na.rm = T), 
       Miles = sum(Miles, na.rm = T),
-      .by = c('Category', 'Activity')
+      .by = c('rowgrp', 'Activity')
     ) %>% 
     mutate(
       tot = sum(tot), 
-      .by = Category
+      .by = rowgrp
     ) %>%
     mutate(
-      Category = factor(Category, levels = allhab$Category)
+      rowgrp = factor(rowgrp, levels = allhab$rowgrp)
     ) %>% 
-    complete(Category, Activity, fill = list(tot = 0, Acres = 0, Miles = 0)) %>% 
+    complete(rowgrp, Activity, fill = list(tot = 0, Acres = 0, Miles = 0)) %>% 
     mutate(
       tot = max(tot), 
-      .by = Category
+      .by = rowgrp
     ) %>% 
     mutate(
-      Category = as.character(Category)
+      rowgrp = as.character(rowgrp)
     )
     
   # total projects
   totproj <- rstsum %>% 
-    select(Category, tot) %>% 
+    select(rowgrp, tot) %>% 
     unique() %>% 
     pull(tot) %>% 
     sum() %>% 
     tibble(
-      Category = 'Total',
+      rowgrp = 'Total',
       tot = .
       )
 
@@ -63,15 +85,13 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
         val < 1 & val > 0 ~ '< 1', 
         T ~ format(round(val, 0), big.mark = ',', trim = T)
       ), 
-      Activity = factor(Activity, levels = c('Restoration', 'Enhancement'),
-                        labels = c('Restoration (Acres / Miles)', 'Enhancement (Acres / Miles)')
-      )
+      Activity = factor(Activity, levels = collevs, labels = collabs)
     ) %>% 
     pivot_wider(names_from = 'var', values_from = 'val', values_fill = '0', names_expand = T) %>%
     unite('val', Acres, Miles, sep = ' / ') %>% 
     pivot_wider(names_from = 'Activity', values_from = 'val', values_fill = '0 / 0', names_expand = T) %>% 
     bind_cols(totproj, .)
-  
+
   # combine all    
   totab <- rstsum %>% 
     mutate(
@@ -86,13 +106,11 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
     ) %>%
     unite('val', Acres, Miles, sep = ' / ') %>% 
     mutate(
-      Activity = factor(Activity, levels = c('Restoration', 'Enhancement'),
-                        labels = c('Restoration (Acres / Miles)', 'Enhancement (Acres / Miles)')
-      )
+      Activity = factor(Activity, levels = collevs, labels = collabs)
     ) %>% 
     pivot_wider(names_from = 'Activity', values_from = 'val', values_fill = '0 / 0', names_expand = T) %>% 
-    select(Category, tot, `Restoration (Acres / Miles)`, `Enhancement (Acres / Miles)`) %>% 
-    left_join(allhab, ., by = 'Category')  %>% 
+    select(rowgrp, tot, all_of(collabs)) %>% 
+    left_join(allhab, ., by = 'rowgrp')  %>% 
     bind_rows(tots) %>% 
     mutate(tot = as.character(tot))
   
@@ -105,7 +123,7 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
   tab <- reactable(
     totab, 
     columns = list(
-      Category = colDef(name = 'Habitat', minWidth = 180, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
+      rowgrp = colDef(name = 'Habitat', minWidth = 180, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
       tot = colDef(name = 'Total projects', minWidth = 80)
     ),
     defaultColDef = colDef(
@@ -122,11 +140,11 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
     defaultPageSize = nrow(totab),
     showPageSizeOptions = F,
     highlight = T,
-    wrap = F
+    wrap = T
   )
   
   # add title
-  ttl <- paste0('Restoration and enhancement projects in Tampa Bay (', yrs, ')')
+  ttl <- paste0('Projects in Tampa Bay by ', tolower(rowgrp), ' habitat (', yrs, ')')
   out <-  htmlwidgets::prependContent(tab, h5(class = "title", ttl))
   
   return(out)

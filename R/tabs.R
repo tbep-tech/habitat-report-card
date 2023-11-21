@@ -18,16 +18,21 @@ load(file = here('data/rstdatall.RData'))
 # maximum year
 cur <- max(rstdatall$Year)
 
-# HMPU compiled table -------------------------------------------------------------------------
+
+# compiled habitat tables ---------------------------------------------------------------------
 
 # all years
-taball <- rstdat_tab(rstdatall, yrrng = c(2006, cur), family = fml)
+pritaball <- tab_fun(rstdatall, yrrng = c(2006, cur), family = fml, rowgrp = 'Primary')
+gentaball <- tab_fun(rstdatall, yrrng = c(1971, cur), family = fml, rowgrp = 'General')
 
 # current year
-tabcur <- rstdat_tab(rstdatall, yrrng = cur, family = fml)
+pritabcur <- tab_fun(rstdatall, yrrng = cur, family = fml, rowgrp = 'Primary')
+gentabcur <- tab_fun(rstdatall, yrrng = cur, family = fml, rowgrp = 'General')
 
-save(taball, file = here('tabs/taball.RData'))
-save(tabcur, file = here('tabs/tabcur.RData'))
+save(pritaball, file = here('tabs/pritaball.RData'))
+save(gentaball, file = here('tabs/gentaball.RData'))
+save(pritabcur, file = here('tabs/pritabcur.RData'))
+save(gentabcur, file = here('tabs/gentabcur.RData'))
 
 # # hmpu targets/goals tables by subtidal, not subtidal -----------------------------------------
 # 
