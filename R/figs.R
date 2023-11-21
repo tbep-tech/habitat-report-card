@@ -15,7 +15,8 @@ fml <- "roboto"
 
 source(here('R/funcs.R'))
 
-cur <- 2023
+# maximum year
+cur <- max(rstdatall$Year)
 
 # cumulative effort ---------------------------------------------------------------------------
 
@@ -23,6 +24,7 @@ cur <- 2023
 rstsum <- rstdatall %>% 
   filter(Year >= 2006) %>% 
   filter(!is.na(Activity)) %>%
+  filter(Activity != 'Protection') %>%
   group_by(Year, Activity) %>% 
   summarise(
     tot= n(),

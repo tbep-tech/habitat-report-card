@@ -4,17 +4,20 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
   if(length(yrrng) == 1)
     yrrng <- rep(yrrng, 2)
 
+  # habitat categories
   allhab <- dat %>% 
     pull(`Category`) %>% 
     unique() %>% 
     sort() %>% 
-    c(., 'Mix/undocumented') %>% 
+    .[!. %in% 'Other'] %>% 
+    c(., 'Other') %>% 
     tibble(Category = . )
 
   # data prep
   rstsum <- dat %>% 
     filter(Year <= yrrng[2] & Year >= yrrng[1]) %>% 
     filter(!is.na(Activity)) %>% 
+    filter(Activity != 'Protection') %>% 
     group_by(Category, Activity) %>% 
     summarise(
       tot= n(),
@@ -34,9 +37,6 @@ rstdat_tab <- function(dat, yrrng, fntsz = 14, family){
     ) %>% 
     pivot_wider(names_from = 'var', values_from = 'val', values_fill = 0, names_expand = T) %>% 
     select(Category, tot, `Restoration, Acres`, `Restoration, Miles`, `Enhancement, Acres`, `Enhancement, Miles`) %>% 
-    mutate(
-      Category = ifelse(is.na(Category), 'Mix/undocumented', Category)
-    ) %>% 
     left_join(allhab, ., by = 'Category') %>% 
     rowwise() %>% 
     mutate_all(function(x) ifelse(is.na(x), 0, x))

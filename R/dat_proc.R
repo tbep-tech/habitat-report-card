@@ -15,13 +15,7 @@ rstdatall <- read.csv(pth, stringsAsFactors = F) %>%
     Miles,
     Feet
   ) %>%
-  filter(Category != 'Other') %>%
   mutate(
-    Category = case_when(
-      Category == 'Living shorelines' ~ 'Living Shorelines',
-      T ~ Category 
-    ), 
-    Acres = gsub('Enhancement', '', Acres), 
     Acres = as.numeric(Acres),
     Miles = case_when(
       is.na(Miles) & !is.na(Feet) ~ Feet / 5280,
