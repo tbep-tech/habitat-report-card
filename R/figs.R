@@ -6,6 +6,8 @@ library(plotrix)
 library(RColorBrewer)
 library(scales)
 library(tbeptools)
+library(ggspatial)
+library(sf)
 
 load(file = here('data/rstdatall.RData'))
 
@@ -407,6 +409,30 @@ p <- p1 + p2 + p3 + plot_layout(ncol = 3)
 
 png(here('docs/figs/barcur.png'), height = 5, width = 8, family = 'serif', units = 'in', res = 500)
 print(p)
+dev.off()
+
+# map -----------------------------------------------------------------------------------------
+
+tomap <- rstdatall %>% 
+  st_as_sf(coords = c('Lon', 'Lat'), crs = 4326) %>% 
+  .[tbshed, ]
+
+m <- ggplot() + 
+  ggspatial::annotation_map_tile(zoom = 9, type = 'cartolight', cachedir = system.file("rosm.cache", package = "ggspatial")) + 
+  annotation_north_arrow(location = 'tl', style = north_arrow_orienteering(fill = c('black', 'black'), text_col = NA)) +
+  annotation_scale(location = 'br', text_cex = 1.5,) +
+  geom_sf(data= tbshed, fill = 'grey', color = 'darkgrey', inherit.aes = F, alpha = 0.5, linewidth = 1.5) +
+  geom_sf(data = tomap, fill = '#00806E', color = 'black', pch = 21, inherit.aes = F, size = 4) +
+  theme(
+    panel.grid = element_blank(), 
+    axis.title = element_blank(), 
+    axis.text = element_blank(), 
+    axis.ticks = element_blank(),
+    panel.background = element_rect(fill = NA, color = 'black')
+  )
+
+png(here('docs/figs/map.png'), height = 5, width = 8, family = 'serif', units = 'in', res = 500)
+print(m)
 dev.off()
 
 # HMP report cards ----------------------------------------------------------------------------

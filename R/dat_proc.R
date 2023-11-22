@@ -8,7 +8,9 @@ pth <- 'https://raw.githubusercontent.com/tbep-tech/TBEP_Habitat_Restoration/mai
 
 rstdatall <- read.csv(pth, stringsAsFactors = F) %>% 
   select(
-    Year = Federal_Fiscal_Year,
+    Year = Federal_Fiscal_Year,, 
+    Lat = Latitude, 
+    Lon = Longitude,
     Primary = PrimaryHabitat,
     General = GeneralHabitat,
     Activity = GeneralActivity,
@@ -32,6 +34,6 @@ rstdatall <- read.csv(pth, stringsAsFactors = F) %>%
     Primary = ifelse(Primary == '', NA, Primary),
     Activity = ifelse(Activity == '', NA, Activity)
   ) %>% 
-  select(Year, Primary, General, Activity, Acres, Miles)
+  select(Year, Lat, Lon, Primary, General, Activity, Acres, Miles)
 
 save(rstdatall, file = here('data/rstdatall.RData'))

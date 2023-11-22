@@ -32,7 +32,7 @@ load(file = here('tabs/pritaball.RData'))
 load(file = here('tabs/gentaball.RData'))
 load(file = here('tabs/pritabcur.RData'))
 load(file = here('tabs/gentabcur.RData'))
-cur <- gsub('^.*\\(|\\)</h5>', '', gentabcur$prepend[[1]])
+cur <- max(rstdatall$Year)
 ```
 
 Data are from USEPA Generalized Performance and Results Act, National Estuary Program Online Reporting Tool (GPRA/NEPORT), as reported by the Tampa Bay Estuary Program.
@@ -114,6 +114,12 @@ knitr::include_graphics(here('docs/figs/barcur.png'))
 
 ```{r}
 knitr::include_graphics(here('docs/figs/totalpie.png'))
+```
+
+## Map
+
+```{r}
+knitr::include_graphics(here('docs/figs/map.png'))
 ```
 
 :::
