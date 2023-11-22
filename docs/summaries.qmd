@@ -122,4 +122,10 @@ knitr::include_graphics(here('docs/figs/totalpie.png'))
 knitr::include_graphics(here('docs/figs/map.png'))
 ```
 
+## Report card
+
+```{r}
+knitr::include_graphics(here('docs/figs/hmpreport.png'))
+```
+
 :::

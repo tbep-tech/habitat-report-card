@@ -12,8 +12,9 @@ library(sf)
 load(file = here('data/rstdatall.RData'))
 
 # get font
-font_add_google("Roboto", "roboto")#, regular = 'C:/Windows/Fonts/Roboto.ttf')
-fml <- "roboto"
+font_add_google("Roboto")
+fml <- "Roboto"
+# showtext_auto()
 
 source(here('R/funcs.R'))
 
@@ -431,19 +432,20 @@ m <- ggplot() +
     panel.background = element_rect(fill = NA, color = 'black')
   )
 
-png(here('docs/figs/map.png'), height = 5, width = 8, family = 'serif', units = 'in', res = 500)
+png(here('docs/figs/map.png'), height = 5, width = 8, units = 'in', res = 500)
 print(m)
 dev.off()
 
 # HMP report cards ----------------------------------------------------------------------------
 
-# show_hmpreport(acres, subtacres, hmptrgs, typ = "targets", ycollapse = TRUE, text = 3)
-# 
-# show_hmpreport(acres, subtacres, hmptrgs, typ = "targets", ycollapse = TRUE, strata = c('Intertidal', 'Supratidal'), text = 3)
+p1 <- show_hmpreport(acres = acres, subtacres = subtacres, hmptrgs = hmptrgs, typ = 'targets',
+                     strata = 'Subtidal', ycollapse = T, xang = 45)
+p2 <- show_hmpreport(acres = acres, subtacres = subtacres, hmptrgs = hmptrgs, typ = 'targets',
+                     strata = c('Intertidal', 'Supratidal'), ycollapse = T, xang = 45)
 
-# p1 <- show_hmpreport(acres = acres, subtacres = subtacres, hmptrgs = hmptrgs, typ = 'targets',
-#                      strata = 'Subtidal', ycollapse = T, xang = 45)
-# p2 <- show_hmpreport(acres = acres, subtacres = subtacres, hmptrgs = hmptrgs, typ = 'targets',
-#                      strata = c('Intertidal', 'Supratidal'), ycollapse = T, xang = 45) + labs(title = NULL)
-# 
-# p1 + p2 + plot_layout(ncol = 2, guides = 'collect', widths = c(0.6, 1))
+p <- p1 + p2 + plot_layout(ncol = 2, guides = 'collect', widths = c(0.6, 1)) & labs(title = NULL)
+
+png(here('docs/figs/hmpreport.png'), height = 6, width = 7, units = 'in', res = 500)
+print(p)
+dev.off()
+
