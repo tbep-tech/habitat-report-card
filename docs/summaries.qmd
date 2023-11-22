@@ -25,7 +25,9 @@ lightbox: auto
 library(knitr)
 library(here)
 library(reactable)
+library(dplyr)
 
+load(file = here('data/rstdatall.RData'))
 load(file = here('tabs/pritaball.RData'))
 load(file = here('tabs/gentaball.RData'))
 load(file = here('tabs/pritabcur.RData'))
@@ -41,6 +43,18 @@ Data are from USEPA Generalized Performance and Results Act, National Estuary Pr
 ::: {.callout-note collapse="true"}
 Summaries by primary habitat do not include "Protection" activities, which may include additional unnatural habitat categories not evaluated by the TBEP Habitat Master Plan.  Primary habitat summaries are also only possible from 2006 to present.
 :::
+
+```{r}
+prodat <- filter(rstdatall, Activity == 'Protection')
+protot <- nrow(prodat)
+procur <- prodat %>% filter(Year == cur) %>% nrow()
+```
+
+##### **`r protot` protection projects** to date.
+
+##### **`r procur` protection projects** in `r cur`.
+
+<br>
 
 ```{r}
 pritaball
