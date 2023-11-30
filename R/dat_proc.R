@@ -4,11 +4,11 @@ library(here)
 # simple version of all restoration projects --------------------------------------------------
 
 # from https://github.com/tbep-tech/TBEP_Habitat_Restoration
-pth <- 'https://raw.githubusercontent.com/tbep-tech/TBEP_Habitat_Restoration/main/Habitat_Restoration_Clean.csv'
+pth <- 'https://raw.githubusercontent.com/tbep-tech/TBEP_Habitat_Restoration/main/restoration.csv'
 
 rstdatall <- read.csv(pth, stringsAsFactors = F) %>% 
   select(
-    Year = Federal_Fiscal_Year,, 
+    Year = Federal_Fiscal_Year,
     Lat = Latitude, 
     Lon = Longitude,
     Primary = PrimaryHabitat,
