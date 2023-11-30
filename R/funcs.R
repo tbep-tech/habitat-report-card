@@ -19,6 +19,8 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'Gener
   collevs <- c('Restoration', 'Enhancement', 'Protection')
   collabs <- c('Restoration (Ac / Mi)', 'Enhancement (Ac / Mi)', 'Protection (Ac / Mi)')
   
+  habmin <- 80
+  
   # only unique step for primary habitat categories
   if(rowgrp == 'Primary'){
     
@@ -33,6 +35,8 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'Gener
     
     collevs <- grep('Restoration|Enhancement', collevs, value = T)
     collabs <- grep('Restoration|Enhancement', collabs, value = T)
+    
+    habmin <- 180
     
   }
     
@@ -123,12 +127,12 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'Gener
   tab <- reactable(
     totab, 
     columns = list(
-      rowgrp = colDef(name = 'Habitat', minWidth = 180, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
-      tot = colDef(name = 'Total projects', minWidth = 80)
+      rowgrp = colDef(name = 'Habitat', minWidth = habmin, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
+      tot = colDef(name = 'Total projects', minWidth = 70)
     ),
     defaultColDef = colDef(
       headerStyle= list(fontSize = fntsz, fontFamily = family),
-      minWidth = 150,
+      minWidth = 100,
       resizable = TRUE,
       style = function(value, index) {
         if (index == nrow(totab))
