@@ -430,6 +430,9 @@ m <- ggplot() +
     axis.text = element_blank(), 
     axis.ticks = element_blank(),
     panel.background = element_rect(fill = NA, color = 'black')
+  ) + 
+  labs(
+    subtitle = paste0('Project locations in the watershed (1971-', cur, ')')
   )
 
 png(here('docs/figs/map.png'), height = 5, width = 8, units = 'in', res = 500)
