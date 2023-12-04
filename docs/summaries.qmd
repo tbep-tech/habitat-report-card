@@ -116,6 +116,12 @@ knitr::include_graphics(here('docs/figs/barcur.png'))
 knitr::include_graphics(here('docs/figs/totalpie.png'))
 ```
 
+### Total `r cur` as stacked barplot
+
+```{r, out.width = '50%'}
+knitr::include_graphics(here('docs/figs/totalbar.png'))
+```
+
 ## Map
 
 ```{r}

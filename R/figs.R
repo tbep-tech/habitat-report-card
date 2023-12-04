@@ -8,6 +8,8 @@ library(scales)
 library(tbeptools)
 library(ggspatial)
 library(sf)
+library(forcats)
+library(ggrepel)
 
 load(file = here('data/rstdatall.RData'))
 
@@ -266,6 +268,64 @@ pout <- p1 + p2 + p3 + plot_layout(ncol = 1, guides = 'collect') & thm & guides(
 
 png(here('docs/figs/totalhmprecent.png'), height = 8, width = 7, family = 'serif', units = 'in', res = 500)
 print(pout)
+dev.off()
+
+# current project total bar graph -------------------------------------------------------------
+
+data(rstdatall)
+
+levs <- c("Artificial Reefs", "Coastal Uplands", "Forested Freshwater Wetlands", 
+          "Hard Bottom", "Intertidal Estuarine\n(Other)", "Living Shorelines", 
+          "Low-Salinity Salt Marsh", "Mangrove Forests", "Non-forested\nFreshwater Wetlands", 
+          "Oyster Bars", "Salt Barrens", "Seagrasses", "Tidal Tributaries", "Uplands (Non-coastal)")
+
+
+colfun <- colorRampPalette(brewer.pal(8, "Accent"))
+col <- colfun(length(levs))
+names(col) <- levs
+
+toplo <- rstdatall %>% 
+  filter(Year == cur) %>% 
+  summarise(
+    cnt = n(), 
+    .by = c('Primary', 'Year')
+  ) %>% 
+  mutate(
+    Primary = case_when(
+      Primary == 'Non-forested Freshwater Wetlands' ~ 'Non-forested\nFreshwater Wetlands',
+      Primary == 'Intertidal Estuarine (Other)' ~ 'Intertidal Estuarine\n(Other)',
+      T ~ Primary
+    ),
+    Primary = factor(Primary),
+    Primary = fct_rev(fct_reorder(Primary, cnt))
+  ) %>% 
+  arrange(Primary) %>% 
+  mutate(
+    cumcnt = rev(cumsum(rev(cnt))), 
+    labloc = rev(diff(c(0, rev(cumcnt)))) / 2,
+    labadd = rev(lag(rev(cumcnt))),
+    labadd = ifelse(is.na(labadd), 0, labadd),
+    labloc = labloc + labadd
+  )
+
+p <- ggplot(toplo, aes(x = Year, y = cnt, fill = Primary)) + 
+  geom_col() + 
+  scale_fill_manual(values = col) +
+  # scale_color_manual(values = col) +
+  scale_x_continuous(
+    expand = expansion(mult = 1)
+  ) +
+  theme_void() +
+  theme(
+    legend.position = 'none'
+  ) +
+  geom_text_repel(data = toplo[seq(1, nrow(toplo), by = 2), ], aes(label = Primary, x = Year + 0.45, y = labloc), hjust = 'left',
+                  nudge_x = 0.25, direction = 'y', point.size = NA, size = 6.5) +
+  geom_text_repel(data = toplo[seq(2, nrow(toplo), by = 2), ], aes(label = Primary, x = Year - 0.45, y = labloc), hjust = 'right',
+                  nudge_x = -0.25, direction = 'y', point.size = NA, size = 6.5)
+
+png(here('docs/figs/totalbar.png'), height = 6, width = 7, units = 'in', res = 500)
+print(p)
 dev.off()
 
 # pie charts ----------------------------------------------------------------------------------
