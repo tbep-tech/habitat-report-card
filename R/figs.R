@@ -416,23 +416,34 @@ dev.off()
 
 tomap <- rstdatall %>% 
   st_as_sf(coords = c('Lon', 'Lat'), crs = 4326) %>% 
-  .[tbshed, ]
+  .[tbshed, ] %>% 
+  mutate(
+    filcol = case_when(
+      Year == cur ~ as.character(cur), 
+      T ~ 'Past projects'
+    )
+  )
 
 m <- ggplot() + 
   ggspatial::annotation_map_tile(zoom = 9, type = 'cartolight', cachedir = system.file("rosm.cache", package = "ggspatial")) + 
   annotation_north_arrow(location = 'tl', style = north_arrow_orienteering(fill = c('black', 'black'), text_col = NA)) +
   annotation_scale(location = 'br', text_cex = 1.5,) +
   geom_sf(data= tbshed, fill = 'grey', color = 'darkgrey', inherit.aes = F, alpha = 0.5, linewidth = 1.5) +
-  geom_sf(data = tomap, fill = '#00806E', color = 'black', pch = 21, inherit.aes = F, size = 4) +
+  geom_sf(data = tomap, aes(fill = filcol), color = 'black', pch = 21, inherit.aes = F, size = 4) +
+  scale_fill_manual(values = c('#00806E', '#958984')) +
   theme(
     panel.grid = element_blank(), 
     axis.title = element_blank(), 
     axis.text = element_blank(), 
     axis.ticks = element_blank(),
-    panel.background = element_rect(fill = NA, color = 'black')
+    panel.background = element_rect(fill = NA, color = 'black'), 
+    legend.position = c(1, 1), 
+    legend.justification = c(1, 0.85), 
+    legend.background = element_rect(fill = NA, color = NA)
   ) + 
   labs(
-    subtitle = paste0('Project locations in the watershed (1971-', cur, ')')
+    subtitle = paste0('Project locations in the watershed (1971-', cur, ')'), 
+    fill = NULL
   )
 
 png(here('docs/figs/map.png'), height = 5, width = 8, units = 'in', res = 500)
