@@ -309,20 +309,20 @@ toplo <- rstdatall %>%
   )
 
 p <- ggplot(toplo, aes(x = Year, y = cnt, fill = Primary)) + 
-  geom_col() + 
+  geom_col(width = 0.3) + 
   scale_fill_manual(values = col) +
   # scale_color_manual(values = col) +
   scale_x_continuous(
-    expand = expansion(mult = 1)
+    expand = expansion(mult = 2)
   ) +
   theme_void() +
   theme(
     legend.position = 'none'
   ) +
-  geom_text_repel(data = toplo[seq(1, nrow(toplo), by = 2), ], aes(label = Primary, x = Year + 0.45, y = labloc), hjust = 'left',
-                  nudge_x = 0.25, direction = 'y', point.size = NA, size = 6.5) +
-  geom_text_repel(data = toplo[seq(2, nrow(toplo), by = 2), ], aes(label = Primary, x = Year - 0.45, y = labloc), hjust = 'right',
-                  nudge_x = -0.25, direction = 'y', point.size = NA, size = 6.5)
+  geom_text_repel(data = toplo[seq(1, nrow(toplo), by = 2), ], aes(label = Primary, x = Year + 0.15, y = labloc), hjust = 'left',
+                  nudge_x = 0.25, direction = 'y', point.size = NA, size = 8) +
+  geom_text_repel(data = toplo[seq(2, nrow(toplo), by = 2), ], aes(label = Primary, x = Year - 0.15, y = labloc), hjust = 'right',
+                  nudge_x = -0.25, direction = 'y', point.size = NA, size = 8)
 
 png(here('docs/figs/totalbar.png'), height = 6, width = 7, units = 'in', res = 500)
 print(p)
