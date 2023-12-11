@@ -29,6 +29,13 @@ levs <- c("Artificial Reefs", "Coastal Uplands", "Forested Freshwater Wetlands",
           "Low-Salinity Salt Marsh", "Mangrove Forests", "Non-forested Freshwater Wetlands", 
           "Oyster Bars", "Salt Barrens", "Seagrasses", "Tidal Tributaries", "Uplands (Non-coastal)")
 
+thm <- theme_minimal() + 
+  theme(
+    legend.position = 'top', 
+    axis.title.x = element_blank(), 
+    panel.grid.minor.y = element_blank()
+  )
+
 # cumulative projects, whole database ---------------------------------------------------------
 
 # data prep
@@ -41,13 +48,6 @@ rstsum <- rstdatall %>%
   mutate(
     cumtot = cumsum(tot)
   ) 
-
-thm <- theme_minimal() + 
-  theme(
-    legend.position = 'top', 
-    axis.title.x = element_blank(), 
-    panel.grid.minor.y = element_blank()
-  )
 
 toplo1 <- rstsum
 
@@ -87,13 +87,6 @@ rstsum <- rstdatall %>%
     cummiles = cumsum(Miles)
   ) %>% 
   ungroup()
-
-thm <- theme_minimal() + 
-  theme(
-    legend.position = 'top', 
-    axis.title.x = element_blank(), 
-    panel.grid.minor.y = element_blank()
-  )
 
 toplo1 <- rstsum
 
@@ -158,13 +151,6 @@ rstsum <- rstdatall %>%
     cummiles = cumsum(Miles)
   ) %>% 
   ungroup()
-
-thm <- theme_minimal() + 
-  theme(
-    legend.position = 'top', 
-    axis.title.x = element_blank(), 
-    panel.grid.minor.y = element_blank()
-  )
 
 toplo1 <- rstsum
 ncol <- length(levels(toplo1$Primary))
@@ -242,30 +228,12 @@ p1 <- ggplot(toplo1, aes(x = Year, y = tot, fill = Primary)) +
   labs(
     y = 'Projects', 
     fill = NULL,
-  ) 
+  ) +
+  thm +
+  guides(fill = guide_legend(nrow = 5))
 
-p2 <- ggplot(toplo1, aes(x = Year, y = Acres, fill = Primary)) + 
-  scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
-  geom_area(position = 'stack', alpha = 0.8) + 
-  scale_fill_manual(values = colfun(ncol)) +
-  labs(
-    y = 'Acres', 
-    fill = NULL,
-  ) 
-
-p3 <- ggplot(toplo1, aes(x = Year, y = Miles, fill = Primary)) + 
-  scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
-  geom_area(position = 'stack', alpha = 0.8) + 
-  scale_fill_manual(values = colfun(ncol)) +
-  labs(
-    y = 'Miles', 
-    fill = NULL,
-  ) 
-
-pout <- p1 + p2 + p3 + plot_layout(ncol = 1, guides = 'collect') & thm & guides(fill = guide_legend(nrow = 5))
-
-png(here('docs/figs/totalhmp.png'), height = 8, width = 7, family = 'serif', units = 'in', res = 500)
-print(pout)
+png(here('docs/figs/totalhmp.png'), height = 3.75, width = 7, family = 'serif', units = 'in', res = 500)
+print(p1)
 dev.off()
 
 # current totals bar --------------------------------------------------------------------------
@@ -306,7 +274,7 @@ toplo <- rstsum %>%
     acreslab = gsub('\\.0$', '', acreslab)
   )
 
-thm <- theme_minimal() + 
+thm2 <- theme_minimal() + 
   theme(
     panel.grid.minor = element_blank(), 
     panel.grid.major.y = element_blank(), 
@@ -324,7 +292,7 @@ p1 <- ggplot(toplo, aes(x = tot, y = Primary, fill = Primary)) +
   geom_text(aes(label = tot), hjust = 0, nudge_x = 0.5) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$tot) * 1.18)) +
   scale_fill_manual(values = cols) +
-  thm + 
+  thm2 + 
   labs(
     y = NULL, 
     x = 'Total projects'
@@ -335,7 +303,7 @@ p2 <- ggplot(toplo, aes(x = Acres, y = Primary, fill = Primary)) +
   geom_text(aes(label = acreslab), hjust = 0, nudge_x = 1000) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Acres) * 1.55), labels = comma) +
   scale_fill_manual(values = cols) +
-  thm + 
+  thm2 + 
   theme(axis.text.y = element_blank()) +
   labs(
     y = NULL, 
@@ -347,13 +315,12 @@ p3 <- ggplot(toplo, aes(x = Miles, y = Primary, fill = Primary)) +
   geom_text(aes(label = round(Miles, 2)), hjust = 0, nudge_x = 0.005) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Miles) * 1.3)) +
   scale_fill_manual(values = cols) +
-  thm + 
+  thm2 + 
   theme(axis.text.y = element_blank()) +
   labs(
     y = NULL, 
     x = 'Total Miles'
   )
-
 
 p <- p1 + p2 + p3 + plot_layout(ncol = 3)
 
