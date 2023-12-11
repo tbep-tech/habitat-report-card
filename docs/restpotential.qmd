@@ -1,0 +1,44 @@
+---
+title: "Restoration Potential in the Tampa Bay Watershed"
+author: 
+  - name: Dr. Marcus Beck, <mbeck@tbep.org>
+institute: "Tampa Bay Estuary Program"
+date: "`r Sys.Date()`"
+format:
+  html:
+    theme: cosmo
+    code-tools: 
+      source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/restpotential.qmd
+    css: styles.css
+
+execute:
+  echo: false
+  warning: false
+filters:
+  - lightbox
+
+lightbox: auto
+---
+
+```{r}
+#| include: false
+library(mapview)
+library(here)
+library(sf)
+
+restmap <- st_read(here('data/restmap.shp'))
+
+cols <- list(
+  `Coastal Uplands` = 'brown4', 
+  `Freshwater Wetlands` = 'orange', 
+  `Native Uplands` = 'darkgreen', 
+  `Tidal Wetlands` = 'yellow'
+  ) %>% 
+  unlist
+```
+
+The map shows restoration potential for restorable habitats in the Tampa Bay Watershed.  Restorable lands are altered but non-hardened areas where restoration could support native habitats (e.g., fallow farm fields).  These lands are also currently acquired or protected by public agencies.  Restoration potential depends on soil type, soil salinity, and proximity to the coast.  
+
+```{r}
+mapview(restmap, zcol = 'HMPU_TA', col.regions = cols, lwd = 0, homebutton = F, layer.name = '')
+```

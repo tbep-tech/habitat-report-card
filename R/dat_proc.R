@@ -37,3 +37,17 @@ rstdatall <- read.csv(pth, stringsAsFactors = F) %>%
   select(Year, Lat, Lon, Primary, General, Activity, Acres, Miles)
 
 save(rstdatall, file = here('data/rstdatall.RData'))
+
+# restoration map shapefile -------------------------------------------------------------------
+
+source('https://raw.githubusercontent.com/tbep-tech/hmpu-workflow/master/R/funcs.R')
+
+fl <- 'https://raw.githubusercontent.com/tbep-tech/hmpu-workflow/master/data/restorelyr.RData'
+
+download.file(fl, here('data/restorelyr.RData'))
+
+data(restorelyr)
+
+restmap <- restdat_fun(restorelyr)
+
+st_write(restmap, here('data/restmap.shp'))
