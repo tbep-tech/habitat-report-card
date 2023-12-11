@@ -171,6 +171,11 @@ h6 {
   color: #958984;
 }
 
+/* removes all but one trace from the rangeslider */
+.rangeslider-rangeplot .overplot{
+  display:none;
+}
+ 
 /* figure captions */
 
 .caption {
@@ -265,6 +270,8 @@ a:hover {
     text-transform: uppercase;
     letter-spacing: 2px;
     font-weight: 500;
+    margin-left: 3px;
+    margin-top: 3px;
 }
 .nav-pills>li>a:hover, .nav-pills>li>a:focus, .nav-pills>li.active>a,     .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus{
      background-color: #ea6f17;

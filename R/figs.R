@@ -23,6 +23,48 @@ source(here('R/funcs.R'))
 # maximum year
 cur <- max(rstdatall$Year)
 
+# primary habitat levels
+levs <- c("Artificial Reefs", "Coastal Uplands", "Forested Freshwater Wetlands", 
+          "Hard Bottom", "Intertidal Estuarine (Other)", "Living Shorelines", 
+          "Low-Salinity Salt Marsh", "Mangrove Forests", "Non-forested Freshwater Wetlands", 
+          "Oyster Bars", "Salt Barrens", "Seagrasses", "Tidal Tributaries", "Uplands (Non-coastal)")
+
+# cumulative projects, whole database ---------------------------------------------------------
+
+# data prep
+rstsum <- rstdatall %>% 
+  group_by(Year) %>% 
+  summarise(
+    tot= n(), 
+    .groups = 'drop'
+  ) %>% 
+  mutate(
+    cumtot = cumsum(tot)
+  ) 
+
+thm <- theme_minimal() + 
+  theme(
+    legend.position = 'top', 
+    axis.title.x = element_blank(), 
+    panel.grid.minor.y = element_blank()
+  )
+
+toplo1 <- rstsum
+
+p1 <- ggplot(toplo1, aes(x = Year, y = cumtot)) + 
+  # scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
+  geom_line() + 
+  geom_point() +
+  labs(
+    y = 'Cumulative projects', 
+    subtitle = paste(max(toplo1$cumtot), 'projects')
+  ) + 
+  thm
+
+png(here('docs/figs/cumulativehmpall.png'), height = 3, width = 7, family = 'serif', units = 'in', res = 500)
+print(p1)
+dev.off()
+
 # cumulative effort ---------------------------------------------------------------------------
 
 # data prep
@@ -88,48 +130,7 @@ png(here('docs/figs/cumulative.png'), height = 7, width = 7, family = 'serif', u
 print(pout)
 dev.off()
 
-# cumulative projects, whole database ---------------------------------------------------------
-
-# data prep
-rstsum <- rstdatall %>% 
-  group_by(Year) %>% 
-  summarise(
-    tot= n(), 
-    .groups = 'drop'
-  ) %>% 
-  mutate(
-    cumtot = cumsum(tot)
-  ) 
-
-thm <- theme_minimal() + 
-  theme(
-    legend.position = 'top', 
-    axis.title.x = element_blank(), 
-    panel.grid.minor.y = element_blank()
-  )
-
-toplo1 <- rstsum
-
-p1 <- ggplot(toplo1, aes(x = Year, y = cumtot)) + 
-  # scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
-  geom_line() + 
-  geom_point() +
-  labs(
-    y = 'Cumulative projects', 
-    subtitle = paste(max(toplo1$cumtot), 'projects')
-  ) + 
-  thm
-
-png(here('docs/figs/cumulativehmpall.png'), height = 3, width = 7, family = 'serif', units = 'in', res = 500)
-print(p1)
-dev.off()
-
 # cumulative effort by habitat ----------------------------------------------------------------
-
-levs <- c("Artificial Reefs", "Coastal Uplands", "Forested Freshwater Wetlands", 
-          "Hard Bottom", "Intertidal Estuarine (Other)", "Living Shorelines", 
-          "Low-Salinity Salt Marsh", "Mangrove Forests", "Non-forested Freshwater Wetlands", 
-          "Oyster Bars", "Salt Barrens", "Seagrasses", "Tidal Tributaries", "Uplands (Non-coastal)")
 
 # data prep
 rstsum <- rstdatall %>% 
@@ -203,6 +204,37 @@ png(here('docs/figs/cumulativehmp.png'), height = 8, width = 7, family = 'serif'
 print(pout)
 dev.off()
 
+# total habitats by year ----------------------------------------------------------------------
+
+# data prep
+rstsum <- rstdatall %>% 
+  arrange(Year, Primary) %>% 
+  filter(!is.na(Primary)) %>%
+  filter(Year >= 2006) %>% 
+  filter(Primary %in% levs) %>% 
+  mutate(
+    Primary = factor(Primary, levels = levs)
+  ) %>% 
+  select(-Activity) %>% 
+  mutate(prj = 1) %>% 
+  tidyr::complete(Year, Primary, fill = list(Acres = 0, Miles = 0, prj = 0)) %>% 
+  group_by(Year, Primary) %>% 
+  summarise(
+    tot = sum(prj),
+    Acres = sum(Acres, na.rm = T),
+    Miles = sum(Miles, na.rm = T),
+    .groups = 'drop'
+  ) %>% 
+  group_by(Primary) %>% 
+  mutate(
+    cumtot = cumsum(tot),
+    cumacres = cumsum(Acres),
+    cummiles = cumsum(Miles)
+  ) %>% 
+  ungroup()
+
+toplo1 <- rstsum
+
 p1 <- ggplot(toplo1, aes(x = Year, y = tot, fill = Primary)) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
   geom_area(position = 'stack', alpha = 0.8) + 
@@ -236,104 +268,101 @@ png(here('docs/figs/totalhmp.png'), height = 8, width = 7, family = 'serif', uni
 print(pout)
 dev.off()
 
-toplo2 <- toplo1 %>% 
-  filter(Year >= 2020)
-ncol <- length(levels(toplo2$Primary))
+# current totals bar --------------------------------------------------------------------------
 
-p1 <- ggplot(toplo2, aes(x = Year, y = tot, fill = Primary)) + 
-  geom_bar(position = 'stack', stat = 'identity', alpha = 0.8) + 
-  scale_fill_manual(values = colfun(ncol)) +
-  labs(
-    y = 'Projects', 
-    fill = NULL,
-  ) 
+cols <- colorRampPalette(brewer.pal(8, "Accent"))(length(levs))
+names(cols) <- levs
 
-p2 <- ggplot(toplo2, aes(x = Year, y = Acres, fill = Primary)) + 
-  geom_bar(position = 'stack', stat = 'identity', alpha = 0.8) + 
-  scale_fill_manual(values = colfun(ncol)) +
-  labs(
-    y = 'Acres', 
-    fill = NULL,
-  ) 
-
-p3 <- ggplot(toplo2, aes(x = Year, y = Miles, fill = Primary)) + 
-  geom_bar(position = 'stack', stat = 'identity', alpha = 0.8) + 
-  scale_fill_manual(values = colfun(ncol)) +
-  labs(
-    y = 'Miles', 
-    fill = NULL,
-  ) 
-
-pout <- p1 + p2 + p3 + plot_layout(ncol = 1, guides = 'collect') & thm & guides(fill = guide_legend(nrow = 5))
-
-png(here('docs/figs/totalhmprecent.png'), height = 8, width = 7, family = 'serif', units = 'in', res = 500)
-print(pout)
-dev.off()
-
-# current project total bar graph -------------------------------------------------------------
-
-data(rstdatall)
-
-levs <- c("Artificial Reefs", "Coastal Uplands", "Forested Freshwater Wetlands", 
-          "Hard Bottom", "Intertidal Estuarine\n(Other)", "Living Shorelines", 
-          "Low-Salinity Salt Marsh", "Mangrove Forests", "Non-forested\nFreshwater Wetlands", 
-          "Oyster Bars", "Salt Barrens", "Seagrasses", "Tidal Tributaries", "Uplands (Non-coastal)")
-
-
-colfun <- colorRampPalette(brewer.pal(8, "Accent"))
-col <- colfun(length(levs))
-names(col) <- levs
-
-toplo <- rstdatall %>% 
-  filter(Year == cur) %>% 
+# data prep
+rstsum <- rstdatall %>% 
+  arrange(Year, Primary) %>% 
+  filter(Primary %in% levs) %>%
+  filter(Year >= 2006) %>% 
+  mutate(
+    Primary = factor(Primary, levels = levs)
+  ) %>% 
+  select(-Activity) %>% 
+  mutate(prj = 1) %>% 
+  tidyr::complete(Year, Primary, fill = list(Acres = 0, Miles = 0, prj = 0)) %>% 
+  group_by(Year, Primary) %>% 
   summarise(
-    cnt = n(), 
-    .by = c('Primary', 'Year')
+    tot = sum(prj),
+    Acres = sum(Acres, na.rm = T),
+    Miles = sum(Miles, na.rm = T),
+    .groups = 'drop'
   ) %>% 
+  group_by(Year) %>% 
   mutate(
-    Primary = case_when(
-      Primary == 'Non-forested Freshwater Wetlands' ~ 'Non-forested\nFreshwater Wetlands',
-      Primary == 'Intertidal Estuarine (Other)' ~ 'Intertidal Estuarine\n(Other)',
-      T ~ Primary
-    ),
-    Primary = factor(Primary),
-    Primary = fct_rev(fct_reorder(Primary, cnt))
-  ) %>% 
-  arrange(Primary) %>% 
+    alltot = sum(tot),
+    allacres = sum(Acres), 
+    allmiles = sum(Miles)
+  ) 
+
+toplo <- rstsum %>% 
+  filter(Year == cur) %>% 
   mutate(
-    cumcnt = rev(cumsum(rev(cnt))), 
-    labloc = rev(diff(c(0, rev(cumcnt)))) / 2,
-    labadd = rev(lag(rev(cumcnt))),
-    labadd = ifelse(is.na(labadd), 0, labadd),
-    labloc = labloc + labadd
+    Primary = reorder(Primary, tot),
+    acreslab = formatC(round(Acres, 1), big.mark = ",", format = 'f', digits = 1), 
+    acreslab = gsub('\\.0$', '', acreslab)
   )
 
-p <- ggplot(toplo, aes(x = Year, y = cnt, fill = Primary)) + 
-  geom_col(width = 0.3) + 
-  scale_fill_manual(values = col) +
-  # scale_color_manual(values = col) +
-  scale_x_continuous(
-    expand = expansion(mult = 2)
-  ) +
-  theme_void() +
+thm <- theme_minimal() + 
   theme(
-    legend.position = 'none'
-  ) +
-  geom_text_repel(data = toplo[seq(1, nrow(toplo), by = 2), ], aes(label = Primary, x = Year + 0.15, y = labloc), hjust = 'left',
-                  nudge_x = 0.25, direction = 'y', point.size = NA, size = 8) +
-  geom_text_repel(data = toplo[seq(2, nrow(toplo), by = 2), ], aes(label = Primary, x = Year - 0.15, y = labloc), hjust = 'right',
-                  nudge_x = -0.25, direction = 'y', point.size = NA, size = 8)
+    panel.grid.minor = element_blank(), 
+    panel.grid.major.y = element_blank(), 
+    strip.placement = 'none', 
+    legend.position = 'none',
+    strip.background = element_blank(), 
+    strip.text.y = element_text(angle = 90, size = 10), 
+    strip.text.x = element_blank(),
+    axis.title.x = element_text(size = 11), 
+    panel.background = element_rect(fill = alpha('grey', 0.1), color = NA)
+  )
 
-png(here('docs/figs/totalbar.png'), height = 6, width = 7, units = 'in', res = 500)
+p1 <- ggplot(toplo, aes(x = tot, y = Primary, fill = Primary)) + 
+  geom_bar(stat = 'identity') + 
+  geom_text(aes(label = tot), hjust = 0, nudge_x = 0.5) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$tot) * 1.18)) +
+  scale_fill_manual(values = cols) +
+  thm + 
+  labs(
+    y = NULL, 
+    x = 'Total projects'
+  )
+
+p2 <- ggplot(toplo, aes(x = Acres, y = Primary, fill = Primary)) + 
+  geom_bar(stat = 'identity') + 
+  geom_text(aes(label = acreslab), hjust = 0, nudge_x = 1000) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Acres) * 1.55), labels = comma) +
+  scale_fill_manual(values = cols) +
+  thm + 
+  theme(axis.text.y = element_blank()) +
+  labs(
+    y = NULL, 
+    x = 'Total Acres'
+  )
+
+p3 <- ggplot(toplo, aes(x = Miles, y = Primary, fill = Primary)) + 
+  geom_bar(stat = 'identity') + 
+  geom_text(aes(label = round(Miles, 2)), hjust = 0, nudge_x = 0.005) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Miles) * 1.3)) +
+  scale_fill_manual(values = cols) +
+  thm + 
+  theme(axis.text.y = element_blank()) +
+  labs(
+    y = NULL, 
+    x = 'Total Miles'
+  )
+
+
+p <- p1 + p2 + p3 + plot_layout(ncol = 3)
+
+png(here('docs/figs/curbar.png'), height = 5, width = 8, family = 'serif', units = 'in', res = 500)
 print(p)
 dev.off()
 
-# pie charts ----------------------------------------------------------------------------------
+# current projects pie charts -----------------------------------------------------------------
 
-levs <- c("Artificial Reefs", "Coastal Uplands", "Forested Freshwater Wetlands", 
-          "Hard Bottom", "Intertidal Estuarine (Other)", "Living Shorelines", 
-          "Low-Salinity Salt Marsh", "Mangrove Forests", "Non-forested Freshwater Wetlands", 
-          "Oyster Bars", "Salt Barrens", "Seagrasses", "Tidal Tributaries", "Uplands (Non-coastal)")
 cols <- colorRampPalette(brewer.pal(8, "Accent"))(length(levs))
 
 # data prep
@@ -385,90 +414,62 @@ p <- ggplot(toplo, aes(x = alltot/2, y = tot, fill = Primary, width = alltot)) +
     ) +
   guides(fill = guide_legend(nrow = 5))
 
-png(here('docs/figs/totalpie.png'), height = 4, width = 7, family = 'serif', units = 'in', res = 500)
+png(here('docs/figs/curpie.png'), height = 4, width = 7, family = 'serif', units = 'in', res = 500)
 print(p)
 dev.off()
 
-p <- ggplot(toplo, aes(x = allmiles/2, y = Miles, fill = Primary, width = allmiles)) +
-  geom_bar(position = "fill", stat="identity", color = 'black') +
-  facet_wrap(~ Yearmiles, strip.position = 'bottom') + 
-  coord_polar("y") +
-  scale_fill_manual(values = cols) +
+# current projects total bar graph ------------------------------------------------------------
+
+data(rstdatall)
+
+levs2 <- levs
+levs2[levs2 %in% c('Intertidal Estuarine (Other)', 'Non-forested Freshwater Wetlands')] <- c('Intertidal Estuarine\n(Other)', 'Non-forested\nFreshwater Wetlands')
+
+colfun <- colorRampPalette(brewer.pal(8, "Accent"))
+col <- colfun(length(levs2))
+names(col) <- levs2
+
+toplo <- rstdatall %>% 
+  filter(Year == cur) %>% 
+  summarise(
+    cnt = n(), 
+    .by = c('Primary', 'Year')
+  ) %>% 
+  mutate(
+    Primary = case_when(
+      Primary == 'Non-forested Freshwater Wetlands' ~ 'Non-forested\nFreshwater Wetlands',
+      Primary == 'Intertidal Estuarine (Other)' ~ 'Intertidal Estuarine\n(Other)',
+      T ~ Primary
+    ),
+    Primary = factor(Primary, levels = levs2),
+    Primary = fct_rev(fct_reorder(Primary, cnt))
+  ) %>% 
+  arrange(Primary) %>% 
+  mutate(
+    cumcnt = rev(cumsum(rev(cnt))), 
+    labloc = rev(diff(c(0, rev(cumcnt)))) / 2,
+    labadd = rev(lag(rev(cumcnt))),
+    labadd = ifelse(is.na(labadd), 0, labadd),
+    labloc = labloc + labadd
+  )
+
+p <- ggplot(toplo, aes(x = Year, y = cnt, fill = Primary)) + 
+  geom_col(width = 0.3) + 
+  scale_fill_manual(values = col) +
+  # scale_color_manual(values = col) +
+  scale_x_continuous(
+    expand = expansion(mult = 2)
+  ) +
   theme_void() +
   theme(
-    legend.title = element_blank(), 
-    legend.position = 'top', 
-    strip.text = element_text(size = 12)
+    legend.position = 'none'
   ) +
-  guides(fill = guide_legend(nrow = 5))
+  geom_text_repel(data = toplo[seq(1, nrow(toplo), by = 2), ], aes(label = Primary, x = Year + 0.15, y = labloc), hjust = 'left',
+                  nudge_x = 0.25, direction = 'y', point.size = NA, size = 8) +
+  geom_text_repel(data = toplo[seq(2, nrow(toplo), by = 2), ], aes(label = Primary, x = Year - 0.15, y = labloc), hjust = 'right',
+                  nudge_x = -0.25, direction = 'y', point.size = NA, size = 8)
 
-png(here('docs/figs/milespie.png'), height = 4, width = 7, family = 'serif', units = 'in', res = 500)
-print(p)
-dev.off()
-
-# cur only ------------------------------------------------------------------------------------
-
-toplo <- rstsum %>% 
-  filter(Year == cur) %>% 
-  mutate(
-    Primary = reorder(Primary, tot),
-    acreslab = formatC(round(Acres, 1), big.mark = ",", format = 'f', digits = 1), 
-    acreslab = gsub('\\.0$', '', acreslab)
-  )
-
-thm <- theme_minimal() + 
-  theme(
-    panel.grid.minor = element_blank(), 
-    panel.grid.major.y = element_blank(), 
-    strip.placement = 'none', 
-    legend.position = 'none',
-    strip.background = element_blank(), 
-    strip.text.y = element_text(angle = 90, size = 10), 
-    strip.text.x = element_blank(),
-    axis.title.x = element_text(size = 11), 
-    panel.background = element_rect(fill = alpha('grey', 0.1), color = NA)
-  )
-
-p1 <- ggplot(toplo, aes(x = tot, y = Primary, fill = Primary)) + 
-  geom_bar(stat = 'identity') + 
-  geom_text(aes(label = tot), hjust = 0, nudge_x = 0.5) +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$tot) * 1.18)) +
-  scale_fill_manual(values = cols) +
-  thm + 
-  labs(
-    y = NULL, 
-    x = 'Total projects'
-  )
-  
-p2 <- ggplot(toplo, aes(x = Acres, y = Primary, fill = Primary)) + 
-  geom_bar(stat = 'identity') + 
-  geom_text(aes(label = acreslab), hjust = 0, nudge_x = 1000) +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Acres) * 1.55), labels = comma) +
-  scale_fill_manual(values = cols) +
-  thm + 
-  theme(axis.text.y = element_blank()) +
-  labs(
-    y = NULL, 
-    x = 'Total Acres'
-  )
-
-p3 <- ggplot(toplo, aes(x = Miles, y = Primary, fill = Primary)) + 
-  geom_bar(stat = 'identity') + 
-  geom_text(aes(label = round(Miles, 2)), hjust = 0, nudge_x = 0.005) +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Miles) * 1.3)) +
-  scale_fill_manual(values = cols) +
-  thm + 
-  theme(axis.text.y = element_blank()) +
-  labs(
-    y = NULL, 
-    x = 'Total Miles'
-  )
-
-
-p <- p1 + p2 + p3 + plot_layout(ncol = 3)
-
-
-png(here('docs/figs/barcur.png'), height = 5, width = 8, family = 'serif', units = 'in', res = 500)
+png(here('docs/figs/curstack.png'), height = 6, width = 7, units = 'in', res = 500)
 print(p)
 dev.off()
 
