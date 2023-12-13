@@ -28,16 +28,15 @@ library(reactable)
 library(dplyr)
 
 load(file = here('data/rstdatall.RData'))
-load(file = here('tabs/pritaball.RData'))
-load(file = here('tabs/gentaball.RData'))
-load(file = here('tabs/pritabcur.RData'))
-load(file = here('tabs/gentabcur.RData'))
+load(file = here('tabs/gentab.RData'))
+load(file = here('tabs/pritab.RData'))
 cur <- max(rstdatall$Year)
 ```
 
 Data include habitat restoration projects conducted in Tampa Bay and its watershed from 1971 to the present. Records prior to 2006 were compiled during the Tampa Bay Estuary Program's Habitat Master Plan Update (HMP, 2020). Since 2006, habitat restoration data are reported to the Tampa Bay Estuary Program by regional partners and submitted each year to the US Environmental Protection Agency (EPA) through the National Estuary Program Online Reporting Tool (NEPORT) to conform to the Government Performance and Results Act (GPRA).
 
 ::: panel-tabset
+
 ## Table
 
 ::: {.callout-note collapse="true"}
@@ -57,28 +56,22 @@ procur <- prodat %>% filter(Year == cur) %>% nrow()
 <br>
 
 ```{r}
-pritaball
+gentab
 ```
 
 <br>
 
 ```{r}
-gentaball
-```
-
-<br>
-
-```{r}
-pritabcur
-```
-
-<br>
-
-```{r}
-gentabcur
+pritab
 ```
 
 ## Figures, all years
+
+### Total habitat type each year
+
+```{r}
+knitr::include_graphics(here('docs/figs/totalhmp.png'))
+```
 
 ### Cumulative activity
 
@@ -94,12 +87,6 @@ knitr::include_graphics(here('docs/figs/cumulative.png'))
 
 ```{r}
 knitr::include_graphics(here('docs/figs/cumulativehmp.png'))
-```
-
-### Total habitat type each year
-
-```{r}
-knitr::include_graphics(here('docs/figs/totalhmp.png'))
 ```
 
 ## Figures, recent

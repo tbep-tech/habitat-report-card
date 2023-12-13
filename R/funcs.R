@@ -1,13 +1,10 @@
 # gpra database projects table by habitat type (rowgrp)
-tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'General')){
+tab_fun <- function(dat, yrrng, fntsz = 14, family = NULL, rowgrp = c('Primary', 'General')){
 
   rowgrp <- match.arg(rowgrp)
   
   dat <- dat %>% 
     rename(rowgrp = !!rowgrp)
-  
-  if(length(yrrng) == 1)
-    yrrng <- rep(yrrng, 2)
   
   # habitat categories
   allhab <- dat %>% 
@@ -39,7 +36,68 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'Gener
     habmin <- 180
     
   }
-    
+  
+  # prep data by year selection
+  totab1 <- tab_prep(dat, yrrng = yrrng[2], allhab, collevs, collabs)
+  totab2 <- tab_prep(dat, yrrng = yrrng, allhab, collevs, collabs)
+  totab <- list(totab1, totab2) %>% 
+    enframe(name = 'Year') %>% 
+    mutate(
+      Year = case_when(
+        Year == 1 ~ paste0(yrrng[2]), 
+        Year == 2 ~ paste0(yrrng[1], '-', yrrng[2])
+      )
+    ) %>% 
+    unnest('value') %>% 
+    flextable::as_grouped_data('Year') %>%
+    mutate(
+      rowgrp = ifelse(is.na(rowgrp), Year, rowgrp)
+    ) %>% 
+    select(-Year) %>% 
+    as_tibble()
+  
+  # index for bold rows
+  bld <- grep(paste(c(yrrng, 'Total'), collapse = '|'), totab$rowgrp)
+  
+  # table
+  tab <- reactable(
+    totab, 
+    columns = list(
+      rowgrp = colDef(name = 'Habitat', minWidth = habmin, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
+      tot = colDef(name = 'Total projects', minWidth = 70)
+    ),
+    defaultColDef = colDef(
+      headerStyle= list(fontSize = fntsz, fontFamily = family),
+      minWidth = 100,
+      resizable = TRUE,
+      style = function(value, index) {
+        if (index %in% bld)
+          list(fontWeight = "bold", fontSize = fntsz, fontFamily = family)
+        else
+          list(fontSize = fntsz, fontFamily = family)
+      }
+    ),
+    defaultPageSize = nrow(totab),
+    showPageSizeOptions = F,
+    sortable = F,
+    highlight = T,
+    wrap = T
+  )
+  
+  # add title
+  ttl <- paste0('Projects in Tampa Bay by ', tolower(rowgrp), ' habitat')
+  out <-  htmlwidgets::prependContent(tab, h5(class = "title", ttl))
+  
+  return(out)
+  
+}
+
+# internal function to tab_fun to subset by a year or range of years
+tab_prep <- function(dat, yrrng, allhab, collevs, collabs){
+  
+  if(length(yrrng) == 1)
+    yrrng <- rep(yrrng, 2)
+  
   # data prep
   rstsum <- dat %>% 
     filter(Year <= yrrng[2] & Year >= yrrng[1]) %>% 
@@ -65,7 +123,7 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'Gener
     mutate(
       rowgrp = as.character(rowgrp)
     )
-    
+  
   # total projects
   totproj <- rstsum %>% 
     select(rowgrp, tot) %>% 
@@ -75,8 +133,8 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'Gener
     tibble(
       rowgrp = 'Total',
       tot = .
-      )
-
+    )
+  
   # totals from rstsum
   tots <- rstsum %>% 
     pivot_longer(cols = c('Acres', 'Miles'), names_to = 'var', values_to = 'val') %>%
@@ -95,7 +153,7 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'Gener
     unite('val', Acres, Miles, sep = ' / ') %>% 
     pivot_wider(names_from = 'Activity', values_from = 'val', values_fill = '0 / 0', names_expand = T) %>% 
     bind_cols(totproj, .)
-
+  
   # combine all    
   totab <- rstsum %>% 
     mutate(
@@ -118,40 +176,7 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family, rowgrp = c('Primary', 'Gener
     bind_rows(tots) %>% 
     mutate(tot = as.character(tot))
   
-  # yrrng
-  yrs <- yrrng %>% 
-    unique %>% 
-    paste(., collapse = '-')
-  
-  # table
-  tab <- reactable(
-    totab, 
-    columns = list(
-      rowgrp = colDef(name = 'Habitat', minWidth = habmin, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
-      tot = colDef(name = 'Total projects', minWidth = 70)
-    ),
-    defaultColDef = colDef(
-      headerStyle= list(fontSize = fntsz, fontFamily = family),
-      minWidth = 100,
-      resizable = TRUE,
-      style = function(value, index) {
-        if (index == nrow(totab))
-          list(fontWeight = "bold", fontSize = fntsz, fontFamily = family)
-        else
-          list(fontSize = fntsz, fontFamily = family)
-      }
-    ),
-    defaultPageSize = nrow(totab),
-    showPageSizeOptions = F,
-    highlight = T,
-    wrap = T
-  )
-  
-  # add title
-  ttl <- paste0('Projects in Tampa Bay by ', tolower(rowgrp), ' habitat (', yrs, ')')
-  out <-  htmlwidgets::prependContent(tab, h5(class = "title", ttl))
-  
-  return(out)
+  return(totab)
   
 }
 
