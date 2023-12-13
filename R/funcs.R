@@ -16,7 +16,7 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family = NULL, rowgrp = c('Primary',
   collevs <- c('Restoration', 'Enhancement', 'Protection')
   collabs <- c('Restoration (Ac / Mi)', 'Enhancement (Ac / Mi)', 'Protection (Ac / Mi)')
   
-  habmin <- 80
+  habmin <- 105
   
   # only unique step for primary habitat categories
   if(rowgrp == 'Primary'){
@@ -33,7 +33,7 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family = NULL, rowgrp = c('Primary',
     collevs <- grep('Restoration|Enhancement', collevs, value = T)
     collabs <- grep('Restoration|Enhancement', collabs, value = T)
     
-    habmin <- 180
+    habmin <- 235
     
   }
   
@@ -63,13 +63,14 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family = NULL, rowgrp = c('Primary',
   tab <- reactable(
     totab, 
     columns = list(
-      rowgrp = colDef(name = 'Habitat', minWidth = habmin, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
-      tot = colDef(name = 'Total projects', minWidth = 70)
+      rowgrp = colDef(name = 'Habitat', minWidth = habmin, maxWidth = habmin, class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
+      tot = colDef(name = 'Total projects', minWidth = 70, maxWidth = 70)
     ),
     defaultColDef = colDef(
       headerStyle= list(fontSize = fntsz, fontFamily = family),
-      minWidth = 100,
-      resizable = TRUE,
+      minWidth = 105,
+      maxWidth = 105,
+      resizable = F,
       style = function(value, index) {
         if (index %in% bld)
           list(fontWeight = "bold", fontSize = fntsz, fontFamily = family)
@@ -84,9 +85,7 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family = NULL, rowgrp = c('Primary',
     wrap = T
   )
   
-  # add title
-  ttl <- paste0('Projects in Tampa Bay by ', tolower(rowgrp), ' habitat')
-  out <-  htmlwidgets::prependContent(tab, h5(class = "title", ttl))
+  out <- tab
   
   return(out)
   

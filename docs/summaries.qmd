@@ -30,8 +30,6 @@ library(dplyr)
 source(here('R/funcs.R'))
 
 load(file = here('data/rstdatall.RData'))
-load(file = here('tabs/gentab.RData'))
-load(file = here('tabs/pritab.RData'))
 cur <- max(rstdatall$Year)
 curtxt <- summ_fun(rstdatall, cur)
 alltxt <- summ_fun(rstdatall)
@@ -43,11 +41,6 @@ Data include habitat restoration projects conducted in Tampa Bay and its watersh
 
 ## Table
 
-::: {.callout-note collapse="true"}
-Summaries by primary habitat do not include "Protection" activities, which may include additional unnatural habitat categories not evaluated by the TBEP Habitat Master Plan.  Primary habitat summaries are also only possible from 2006 to present.
-:::
-
-
 ##### **`r curtxt$pro` projects** in `r cur`, **`r alltxt$pro` projects** to date
 
 ##### **`r curtxt$acr` acres/`r curtxt$mil` miles** in `r cur`, **`r alltxt$acr` acres/`r alltxt$mil` miles** to date
@@ -56,14 +49,24 @@ Summaries by primary habitat do not include "Protection" activities, which may i
 
 <br>
 
+##### Projects in Tampa Bay by general habitat
+
 ```{r}
-gentab
+#| out.width: 70%
+knitr::include_graphics(here('docs/tabs/gentab.png'))
 ```
 
 <br>
 
+##### Projects in Tampa Bay by primary habitat
+
+::: {.callout-note collapse="true"}
+Summaries by primary habitat do not include "Protection" activities, which may include additional unnatural habitat categories not evaluated by the TBEP Habitat Master Plan.  Primary habitat summaries are also only possible from 2006 to present.
+:::
+
 ```{r}
-pritab
+#| out.width: 70%
+knitr::include_graphics(here('docs/tabs/pritab.png'))
 ```
 
 ## Figures, all years
