@@ -210,3 +210,38 @@ rdataload <- function(x){
   return(out)
     
 }
+
+# get summaries for inline text
+summ_fun <- function(dat, yrrng = NULL){
+  
+  if(!is.null(yrrng)){
+    if(length(yrrng) == 1)
+      yrrng <- rep(yrrng, 2)
+  } else { 
+    yrrng <- range(dat$Year)
+  }
+  
+  # data prep
+  rstsum <- dat %>% 
+    filter(Year <= yrrng[2] & Year >= yrrng[1]) %>% 
+    filter(!is.na(Activity)) %>% 
+    summarise(
+      pro = n(),
+      acr = sum(Acres, na.rm = T), 
+      mil = sum(Miles, na.rm = T),
+      par = length(unique(Partner))
+    ) %>% 
+    mutate(
+      acr = case_when(
+        acr < 1 & acr > 0 ~ '< 1', 
+        T ~ format(round(acr, 0), big.mark = ',', trim = T)
+      ),
+      mil = case_when(
+        mil < 1 & mil > 0 ~ '< 1', 
+        T ~ format(round(mil, 2), big.mark = ',', trim = T)
+      )
+    )
+  
+  return(rstsum)
+  
+}

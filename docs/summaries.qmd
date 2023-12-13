@@ -27,10 +27,14 @@ library(here)
 library(reactable)
 library(dplyr)
 
+source(here('R/funcs.R'))
+
 load(file = here('data/rstdatall.RData'))
 load(file = here('tabs/gentab.RData'))
 load(file = here('tabs/pritab.RData'))
 cur <- max(rstdatall$Year)
+curtxt <- summ_fun(rstdatall, cur)
+alltxt <- summ_fun(rstdatall)
 ```
 
 Data include habitat restoration projects conducted in Tampa Bay and its watershed from 1971 to the present. Records prior to 2006 were compiled during the Tampa Bay Estuary Program's Habitat Master Plan Update (HMP, 2020). Since 2006, habitat restoration data are reported to the Tampa Bay Estuary Program by regional partners and submitted each year to the US Environmental Protection Agency (EPA) through the National Estuary Program Online Reporting Tool (NEPORT) to conform to the Government Performance and Results Act (GPRA).
@@ -43,15 +47,12 @@ Data include habitat restoration projects conducted in Tampa Bay and its watersh
 Summaries by primary habitat do not include "Protection" activities, which may include additional unnatural habitat categories not evaluated by the TBEP Habitat Master Plan.  Primary habitat summaries are also only possible from 2006 to present.
 :::
 
-```{r}
-prodat <- filter(rstdatall, Activity == 'Protection')
-protot <- nrow(prodat)
-procur <- prodat %>% filter(Year == cur) %>% nrow()
-```
 
-##### **`r protot` protection projects** to date.
+##### **`r curtxt$pro` projects** in `r cur`, **`r alltxt$pro` projects** to date
 
-##### **`r procur` protection projects** in `r cur`.
+##### **`r curtxt$acr` acres/`r curtxt$mil` miles** in `r cur`, **`r alltxt$acr` acres/`r alltxt$mil` miles** to date
+
+##### **`r curtxt$par` partners** involved in `r cur`, **`r alltxt$par` partners** involved to date
 
 <br>
 
