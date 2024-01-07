@@ -127,8 +127,10 @@ knitr::include_graphics(here('docs/figs/hmpreport.png'))
 
 ## Progress table
 
-```{=html}
-<iframe height="1050" width="100%" src="https://tbep-tech.github.io/hmpu-workflow/target_table_simple.html"></iframe>
+
+```{r}
+#| out.width: 70%
+knitr::include_graphics(here('docs/tabs/target_table_simple.png'))
 ```
 
 :::

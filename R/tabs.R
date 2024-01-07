@@ -39,13 +39,18 @@ pritab$dependencies <- list(
 
 # save as html, then png, remove html, then trim png with imagemagick
 saveWidget(pritab, here('pritab.html'), selfcontained = TRUE)
-webshot2::webshot(url = here('pritab.html'), file = here('docs/tabs/pritab.png'), zoom = 4)
+webshot(url = here('pritab.html'), file = here('docs/tabs/pritab.png'), zoom = 4)
 file.remove(here('pritab.html'))
 system('magick convert "docs/tabs/pritab.png" -trim docs/tabs/pritab.png')
 
 saveWidget(gentab, here('gentab.html'), selfcontained = TRUE)
-webshot2::webshot(url = here('gentab.html'), file = here('docs/tabs/gentab.png'), zoom = 4, delay = 1)
+webshot(url = here('gentab.html'), file = here('docs/tabs/gentab.png'), zoom = 4, delay = 1)
 file.remove(here('gentab.html'))
 system('magick convert "docs/tabs/gentab.png" -trim docs/tabs/gentab.png')
 
+# progress table ------------------------------------------------------------------------------
+
+# save as png from url, then trim png with imagemagick
+webshot(url = 'https://tbep-tech.github.io/hmpu-workflow/target_table_simple.html', file = here('docs/tabs/target_table_simple.png'), zoom = 4)
+system('magick convert "docs/tabs/target_table_simple.png" -trim docs/tabs/target_table_simple.png')
 
