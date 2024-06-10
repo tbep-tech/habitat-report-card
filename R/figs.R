@@ -481,11 +481,13 @@ dev.off()
 # HMP report cards ----------------------------------------------------------------------------
 
 p1 <- show_hmpreport(acres = acres, subtacres = subtacres, hmptrgs = hmptrgs, typ = 'targets',
-                     strata = 'Subtidal', ycollapse = T, xang = 45)
+                     strata = 'Subtidal', ycollapse = T, xang = 45, twocol = T)
 p2 <- show_hmpreport(acres = acres, subtacres = subtacres, hmptrgs = hmptrgs, typ = 'targets',
-                     strata = c('Intertidal', 'Supratidal'), ycollapse = T, xang = 45)
+                     strata = c('Intertidal', 'Supratidal'), ycollapse = T, xang = 45, twocol = T)
 
-p <- p1 + p2 + plot_layout(ncol = 2, guides = 'collect', widths = c(0.6, 1)) & labs(title = NULL)
+p <- p1 + p2 + plot_layout(ncol = 2, guides = 'collect', widths = c(0.6, 1)) & 
+  labs(title = NULL) &
+  theme(plot.background = element_rect(fill = 'transparent', colour = NA))
 
 png(here('docs/figs/hmpreport.png'), height = 6, width = 7, units = 'in', res = 500)
 print(p)

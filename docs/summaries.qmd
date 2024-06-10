@@ -127,7 +127,6 @@ knitr::include_graphics(here('docs/figs/hmpreport.png'))
 
 ## Progress table
 
-
 ```{r}
 #| out.width: 70%
 knitr::include_graphics(here('docs/tabs/target_table_simple.png'))
