@@ -504,7 +504,7 @@ dev.off()
 p1 <- show_hmpreport(acres = acres, subtacres = subtacres, hmptrgs = hmptrgs, typ = 'targets',
                      strata = 'Subtidal', ycollapse = T, xang = 45, twocol = T)
 p2 <- show_hmpreport(acres = acres, subtacres = subtacres, hmptrgs = hmptrgs, typ = 'targets',
-                     strata = c('Intertidal', 'Supratidal'), ycollapse = T, xang = 45, twocol = T)
+                     strata = c('Intertidal', 'Supratidal'), ycollapse = T, xang = 45, twocol = T, totintertid = F)
 
 p <- p1 + p2 + plot_layout(ncol = 2, guides = 'collect', widths = c(0.6, 1)) & 
   labs(title = NULL) &

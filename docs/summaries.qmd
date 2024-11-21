@@ -129,7 +129,7 @@ knitr::include_graphics(here('docs/figs/hmpreport.png'))
 
 ```{r}
 #| out.width: 70%
-knitr::include_graphics(here('docs/tabs/target_table_simple.png'))
+knitr::include_graphics(here('docs/tabs/target_table_simple_no_total_intertidal.png'))
 ```
 
 :::

@@ -51,6 +51,6 @@ system('magick convert "docs/tabs/gentab.png" -trim docs/tabs/gentab.png')
 # progress table ------------------------------------------------------------------------------
 
 # save as png from url, then trim png with imagemagick
-webshot(url = 'https://tbep-tech.github.io/hmpu-workflow/target_table_simple.html', file = here('docs/tabs/target_table_simple.png'), zoom = 4)
-system('magick convert "docs/tabs/target_table_simple.png" -trim docs/tabs/target_table_simple.png')
+webshot(url = 'https://tbep-tech.github.io/hmpu-workflow/target_table_simple_no_total_intertidal.html', file = here('docs/tabs/target_table_simple_no_total_intertidal.png'), zoom = 4)
+system('magick convert "docs/tabs/target_table_simple_no_total_intertidal.png" -trim docs/tabs/target_table_simple_no_total_intertidal.png')
 
