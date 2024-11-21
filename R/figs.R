@@ -33,7 +33,7 @@ thm <- theme_minimal() +
   theme(
     legend.position = 'top', 
     axis.title.x = element_blank(), 
-    panel.grid.minor.y = element_blank()
+    panel.grid.minor = element_blank()
   )
 
 # cumulative projects, whole database ---------------------------------------------------------
@@ -93,7 +93,7 @@ toplo1 <- rstsum
 p1 <- ggplot(toplo1, aes(x = Year, y = cumtot, fill = Activity)) + 
   geom_area(position = 'stack', alpha = 0.8) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
-  scale_fill_manual(values = colorspace::sequential_hcl(2, palette = 'Hawaii')) +
+  scale_fill_manual(values = colorspace::sequential_hcl(3, palette = 'Hawaii')) +
   labs(
     y = 'Cumulative projects', 
     fill = NULL,
@@ -102,7 +102,7 @@ p1 <- ggplot(toplo1, aes(x = Year, y = cumtot, fill = Activity)) +
 p2 <- ggplot(toplo1, aes(x = Year, y = cumacres, fill = Activity)) + 
   geom_area(position = 'stack', alpha = 0.8) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
-  scale_fill_manual(values = colorspace::sequential_hcl(2, palette = 'Hawaii')) +
+  scale_fill_manual(values = colorspace::sequential_hcl(3, palette = 'Hawaii')) +
   labs(
     y = 'Cumulative acres', 
     fill = NULL,
@@ -111,7 +111,7 @@ p2 <- ggplot(toplo1, aes(x = Year, y = cumacres, fill = Activity)) +
 p3 <- ggplot(toplo1, aes(x = Year, y = cummiles, fill = Activity)) + 
   geom_area(position = 'stack', alpha = 0.8) + 
   scale_x_continuous(breaks = seq(min(toplo1$Year), max(toplo1$Year))) +
-  scale_fill_manual(values = colorspace::sequential_hcl(2, palette = 'Hawaii')) +
+  scale_fill_manual(values = colorspace::sequential_hcl(3, palette = 'Hawaii')) +
   labs(
     y = 'Cumulative miles', 
     fill = NULL,
@@ -287,10 +287,30 @@ thm2 <- theme_minimal() +
     panel.background = element_rect(fill = alpha('grey', 0.1), color = NA)
   )
 
+# Function to calculate required expansion
+get_text_space <- function(plot_data, text_column) {
+
+  xval <- plot_data[[text_column]]
+  if(text_column == 'tot')
+    xval <- round(xval, 0)
+  else
+    xval <- round(xval, 1)
+  
+  max_x <- max(xval, na.rm = T)
+  max_text <- nchar(as.character(max_x))
+  
+  expansion_factor <- 1 + (max_text * 0.08)
+  
+  out <- max_x * expansion_factor
+  
+  return(out)
+  
+}
+
 p1 <- ggplot(toplo, aes(x = tot, y = Primary, fill = Primary)) + 
   geom_bar(stat = 'identity') + 
-  geom_text(aes(label = tot), hjust = 0, nudge_x = 0.5) +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$tot) * 1.18)) +
+  geom_text(aes(label = tot), hjust = -0.1) +
+  scale_x_continuous(expand = c(0, 0), limits = function(x) c(0, get_text_space(toplo, "tot"))) +
   scale_fill_manual(values = cols) +
   thm2 + 
   labs(
@@ -300,8 +320,8 @@ p1 <- ggplot(toplo, aes(x = tot, y = Primary, fill = Primary)) +
 
 p2 <- ggplot(toplo, aes(x = Acres, y = Primary, fill = Primary)) + 
   geom_bar(stat = 'identity') + 
-  geom_text(aes(label = acreslab), hjust = 0, nudge_x = 1000) +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Acres) * 1.55), labels = comma) +
+  geom_text(aes(label = acreslab), hjust = -0.1) +
+  scale_x_continuous(expand = c(0, 0), limits = function(x) c(0, get_text_space(toplo, "Acres")), labels = comma) +
   scale_fill_manual(values = cols) +
   thm2 + 
   theme(axis.text.y = element_blank()) +
@@ -312,8 +332,8 @@ p2 <- ggplot(toplo, aes(x = Acres, y = Primary, fill = Primary)) +
 
 p3 <- ggplot(toplo, aes(x = Miles, y = Primary, fill = Primary)) + 
   geom_bar(stat = 'identity') + 
-  geom_text(aes(label = round(Miles, 2)), hjust = 0, nudge_x = 0.005) +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, max(toplo$Miles) * 1.3)) +
+  geom_text(aes(label = round(Miles, 2)), hjust = -0.1) +
+  scale_x_continuous(expand = c(0, 0), limits = function(x) c(0, get_text_space(toplo, "Miles"))) +
   scale_fill_manual(values = cols) +
   thm2 + 
   theme(axis.text.y = element_blank()) +
@@ -390,7 +410,7 @@ dev.off()
 data(rstdatall)
 
 levs2 <- levs
-levs2[levs2 %in% c('Intertidal Estuarine (Other)', 'Non-forested Freshwater Wetlands')] <- c('Intertidal Estuarine\n(Other)', 'Non-forested\nFreshwater Wetlands')
+levs2[levs2 %in% c('Intertidal Estuarine (Other)', 'Non-forested Freshwater Wetlands', 'Forested Freshwater Wetlands')] <- c('Intertidal Estuarine\n(Other)', 'Non-forested\nFreshwater Wetlands', 'Forested Freshwater\nWetlands')
 
 colfun <- colorRampPalette(brewer.pal(8, "Accent"))
 col <- colfun(length(levs2))
@@ -406,6 +426,7 @@ toplo <- rstdatall %>%
     Primary = case_when(
       Primary == 'Non-forested Freshwater Wetlands' ~ 'Non-forested\nFreshwater Wetlands',
       Primary == 'Intertidal Estuarine (Other)' ~ 'Intertidal Estuarine\n(Other)',
+      Primary == 'Forested Freshwater Wetlands' ~ 'Forested Freshwater\nWetlands',
       T ~ Primary
     ),
     Primary = factor(Primary, levels = levs2),

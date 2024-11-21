@@ -4,7 +4,8 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family = NULL, rowgrp = c('Primary',
   rowgrp <- match.arg(rowgrp)
   
   dat <- dat %>% 
-    rename(rowgrp = !!rowgrp)
+    rename(rowgrp = !!rowgrp) |> 
+    filter()
   
   # habitat categories
   allhab <- dat %>% 
@@ -13,8 +14,8 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family = NULL, rowgrp = c('Primary',
     sort() %>%
     tibble(rowgrp = .)
   
-  collevs <- c('Restoration', 'Enhancement', 'Protection')
-  collabs <- c('Restoration (Ac / Mi)', 'Enhancement (Ac / Mi)', 'Protection (Ac / Mi)')
+  collevs <- c('Restoration', 'Maintenance', 'Protection')
+  collabs <- c('Restoration (Ac / Mi)', 'Maintenance (Ac / Mi)', 'Protection (Ac / Mi)')
   
   habmin <- 105
   
@@ -30,8 +31,8 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family = NULL, rowgrp = c('Primary',
     dat <- dat %>% 
       filter(Activity != 'Protection')
     
-    collevs <- grep('Restoration|Enhancement', collevs, value = T)
-    collabs <- grep('Restoration|Enhancement', collabs, value = T)
+    collevs <- grep('Restoration|Maintenance', collevs, value = T)
+    collabs <- grep('Restoration|Maintenance', collabs, value = T)
     
     habmin <- 235
     
