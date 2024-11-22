@@ -516,7 +516,7 @@ p <- p1 + p2 + plot_layout(ncol = 2, guides = 'collect', widths = c(0.6, 1)) &
     legend.position = 'bottom'
     )
 
-png(here('docs/figs/hmpreport.png'), height = 6, width = 7, units = 'in', res = 500)
+png(here('docs/figs/hmpreport.png'), height = 6.5, width = 7, units = 'in', res = 500)
 print(p)
 dev.off()
 
