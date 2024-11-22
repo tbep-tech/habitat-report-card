@@ -64,7 +64,19 @@ tab_fun <- function(dat, yrrng, fntsz = 14, family = NULL, rowgrp = c('Primary',
   tab <- reactable(
     totab, 
     columns = list(
-      rowgrp = colDef(name = 'Habitat', minWidth = habmin, maxWidth = habmin, align = 'left', class = 'sticky left-col-1-bord', headerClass = 'sticky left-col-1-bord', footerClass = 'sticky left-col-1-bord'), 
+      rowgrp = colDef(
+        name = 'Habitat', 
+        minWidth = habmin, 
+        maxWidth = habmin, 
+        align = 'left',
+        style = function(value, index) {
+          if (!index %in% bld) {
+            list(paddingLeft = "15px", fontSize = fntsz, fontFamily = family)
+          } else {
+            list(fontWeight = "bold", fontSize = fntsz, fontFamily = family)
+          }
+        }
+      ), 
       tot = colDef(name = 'Total projects', minWidth = 70, maxWidth = 70)
     ),
     defaultColDef = colDef(
