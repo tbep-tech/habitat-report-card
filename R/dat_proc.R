@@ -12,6 +12,7 @@ rstdatall <- read.csv(pth, stringsAsFactors = F) %>%
     Partner = Lead_Implementer,
     Lat = Latitude, 
     Lon = Longitude,
+    Restoration_Technique,
     Primary = PrimaryHabitat,
     General = GeneralHabitat,
     Activity = GeneralActivity,
@@ -20,6 +21,10 @@ rstdatall <- read.csv(pth, stringsAsFactors = F) %>%
     Feet
   ) %>%
   mutate(
+    Miles = case_when(
+      Activity %in% 'Maintenance' & Restoration_Technique %in% 'Debris Removal' ~ NA_real_,
+      T ~ Miles
+    ),
     Acres = as.numeric(Acres),
     Miles = case_when(
       is.na(Miles) & !is.na(Feet) ~ Feet / 5280,

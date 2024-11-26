@@ -47,7 +47,9 @@ Data include habitat restoration projects conducted in Tampa Bay and its watersh
 
 ##### **`r curtxt$par` partners** involved in `r cur`, **`r alltxt$par` partners** involved to date
 
-<br>
+::: {.callout-note collapse="true"}
+Mileage summaries for maintenance activities do not include projects reported as debris removal.
+:::
 
 ##### Projects in Tampa Bay by general habitat
 
