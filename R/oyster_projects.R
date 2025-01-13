@@ -34,8 +34,7 @@ rstdata <- read.csv(pth, stringsAsFactors = F)%>%
     General = ifelse(General == '', NA, General),
     Primary = ifelse(Primary == '', NA, Primary),
     Activity = ifelse(Activity == '', NA, Activity)
-  )  
- 
+  ) 
 
 # Check for "oyster" in any column-----------------------------------------------
 result <- apply(rstdata, 2, function(x) grepl(c("oyster","Oyster"), x, ignore.case = TRUE))
@@ -44,18 +43,21 @@ rows_with_oyster <- which(rowSums(result) > 0)
 # Display the rows where "oyster" appears
 oyster <- rstdata[rows_with_oyster, ]%>%
   filter(General %in% c("Estuarine","Mix (estuarine and freshwater)"), Activity=="Restoration")
+test <- oyster%>%
+  filter(Restoration_Technique=='Planting')
 
 #filter by PrimaryHabitat (for years >=2006)------------------------------------
 oyster2 <- rstdata[rows_with_oyster, ]%>%
   filter(Primary %in% c("Oyster Bars","Hard Bottom","Mangrove Forests","Living Shorelines","Artificial Reefs",
-                               "Low-Salinity Salt Marsh", "Intertidal Estuarine (Other)"), Activity=='Restoration')
+        "Low-Salinity Salt Marsh", "Intertidal Estuarine (Other)"), Activity=='Restoration')
 
 #combine dataframes and delete duplicates---------------------------------------------------
-oyster_merge <- rbind(oyster, oyster2)
-oyster_all <- distinct(oyster_merge)%>%
+oyster_all <- distinct(rbind(oyster, oyster2))%>%
+  #deleting projects that are not oyster-related
+  filter(!(View_Detail %in% c("18677", "18959","21999")) & Project_Name != "Autism inspired Plants!")%>%
+  arrange(Year)%>%
   select(Year, Partner, Lat, Lon, Project_Name, Project_Description, Habitat_Type, 
-         Restoration_Technique, Project_Benefits, Primary, General, Activity, Acres, Miles)
+                      Restoration_Technique, Project_Benefits, Primary, General, Activity, Acres, Miles)
 
-  
 save(oyster_all, file = here('data/subsets/oysterprojects.RData'))
 write.csv(oyster_all, here("data/subsets/oysterprojects.csv"), row.names = FALSE)
