@@ -1,0 +1,395 @@
+---
+title: "Oyster Bay Segment Tresholds"
+author: "Tampa Bay Estuary Program"
+date: "`r Sys.Date()`"
+format:
+  html:
+    theme: cosmo
+    code-tools: 
+      source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/oysterthresh.qmd
+    css: styles.css
+    
+lightbox: true
+
+execute:
+  echo: false
+  warning: false
+---
+
+```{r}
+#| include: false
+library(sf)
+library(tidyverse)
+library(here)
+library(reactable)
+library(reactablefmtr)
+library(leaflet)
+
+source(here('R/funcs.R'))
+
+load(file = here('data/oysterhsi.RData'))
+load(file = here('data/oysdat.RData'))
+load(file = here('data/oysunion.RData'))
+
+data(swfwmdtbseg, package = 'tbeptools')
+
+goal <- 471
+
+levs <- c('Old Tampa Bay', 'Hillsborough Bay', 'Middle Tampa Bay',
+          'Lower Tampa Bay', 'Boca Ciega Bay', 'Terra Ceia Bay', 'Manatee River')
+
+toint <- swfwmdtbseg |> 
+  st_transform(st_crs(oysterhsi))
+
+oydat <- oysterhsi |> 
+  select(
+    osi = OSI_VALUE
+  ) |> 
+  filter(osi %in% c(14, 15)) |> 
+  st_intersection(toint) |>
+  mutate(
+    acres = as.numeric(units::set_units(st_area(Shape), 'acre'))
+  ) 
+```
+
+Oyster acreage thresholds are based on the Habitat Master Plan goal of 471 acres by 2050.  Thresholds are defined separately for the seven bay segments in Old Tampa Bay using the Oyster Habitat Suitability Index, where categories 14 and 15 are considered ideal restoration potential for oysters.
+
+```{r}
+#| fig-cap: "Graphical Summary of Oyster Habitat Suitability Index (OSI) 14 and 15 Acreage by Bay Segment"
+#| fig-width: 7
+#| fig-height: 4
+
+toplo <- oydat |> 
+  st_set_geometry(NULL) |> 
+  summarise(
+    acres = sum(acres, na.rm = TRUE),
+    .by = c('osi', 'segment')
+  ) |> 
+  mutate(
+    segment = factor(segment, levels = rev(levs)), 
+    osi = factor(osi, levels = c('15', '14'))
+  )
+
+ggplot(toplo, aes(x = acres / 1000, y = segment, fill = osi)) +
+  geom_col(position = 'stack', alpha = 0.85) +
+  scale_fill_manual(values = c('darkblue', 'lightblue')) +
+  labs(
+    y = NULL,
+    x = 'Acres of Suitable Habitat (x1000)',
+    fill = 'Oyster Habitat Suitability Index'
+  ) +
+  guides(fill = guide_legend(reverse = T)) + 
+  theme_minimal() +
+  theme(
+    legend.position = 'top',
+    panel.grid.major.y = element_blank()
+  )
+
+```
+
+```{r}
+totab <- toplo |> 
+  pivot_wider(
+    names_from = 'osi', 
+    values_from = 'acres', 
+    values_fill = 0
+  ) |> 
+  mutate(
+    Total = `14` + `15`
+  )
+
+reactable(totab, 
+          columns = list(
+            segment = colDef(name = 'Bay Segment', footer = 'Total'), 
+            `14` = colDef(name = 'OHSI 14', footer = function(values) htmltools::tags$b(format(round(sum(values), 0), big.mark = ','))),
+            `15` = colDef(name = 'OHSI 15', footer = function(values) htmltools::tags$b(format(round(sum(values), 0), big.mark = ','))),
+            Total = colDef(footer = function(values) htmltools::tags$b(format(round(sum(values), 0), big.mark = ',')))
+          ),
+          defaultColDef = colDef(
+            format = colFormat(separators = TRUE, digits = 0), 
+            footerStyle = list(fontWeight = 'bold')
+          ),
+          columnGroups = list(colGroup('Acres', columns = c('14', '15', 'Total'))),
+          defaultPageSize = 7,
+          highlight = TRUE,
+          striped = TRUE,
+          bordered = TRUE,
+          showPageSizeOptions = FALSE,
+          showSortable = FALSE
+  ) |> 
+  add_title(
+    "Tabular Summary of Oyster Habitat Suitability Index (OHSI) 14 and 15 Acreage by Bay Segment", 
+    font_size = 15, 
+    font_color = 'grey', 
+    font_weight = 'normal'
+  )
+```
+
+<br>
+
+Thresholds can be defined based on the proportional acreages by bay segment, considering either the highest OHSI category (15) or the top two OHSI categories (14 and 15). 
+
+```{r}
+thrs <- totab |> 
+  mutate(
+    `14 and 15` = goal * Total / sum(Total), 
+    `15 only` = goal * `15` / sum(`15`)
+  ) |> 
+  select(-`14`, -`15`, -Total)
+
+reactable(thrs, 
+          columns = list(
+            segment = colDef(name = 'Bay Segment', footer = 'Total'), 
+            `14 and 15` = colDef(name = 'OHSI 14 and 15', footer = function(values) htmltools::tags$b(format(round(sum(values), 0), big.mark = ','))),
+            `15 only` = colDef(name = 'OHSI 15 only', footer = function(values) htmltools::tags$b(format(round(sum(values), 0), big.mark = ',')))
+          ),
+          defaultColDef = colDef(
+            format = colFormat(separators = TRUE, digits = 0), 
+            footerStyle = list(fontWeight = 'bold')
+          ),
+          columnGroups = list(colGroup('Acres', columns = c('15 only', '14 and 15'))),
+          defaultPageSize = 7,
+          highlight = TRUE,
+          striped = TRUE,
+          bordered = TRUE,
+          showPageSizeOptions = FALSE,
+          showSortable = FALSE
+  ) |> 
+  add_title(
+    "Potential Oyster Thresholds by Bay Segment based on a 2050 Goal of 471 Acres Set Proportionally by OHSI Categories (15 only, 14 and 15 Combined)", 
+    font_size = 15, 
+    font_color = 'grey', 
+    font_weight = 'normal'
+  )
+```
+
+<br>
+
+An assessment of trends in oyster acreage by bay segment relative to the potential thresholds can help identify restoration priorities.
+
+```{r}
+#| fig-cap: "Oyster Acres by Bay Segment with OHSI Thresholds"
+#| fig-width: 7
+#| fig-height: 7
+
+toplo <- oysdat |> 
+  left_join(thrs, by = 'segment')
+
+ggplot(toplo, aes(x = yr, y = acres)) + 
+  geom_col(alpha = 0.85, fill = '#00806E') + 
+  facet_wrap(~segment, ncol = 3) +
+  scale_x_continuous(breaks = c(2014, 2016, 2018, 2020, 2022, 2024)) +
+  geom_hline(aes(yintercept = `15 only`, linetype = '15 only'), color = 'tomato1', linewidth = 1) +
+  geom_hline(aes(yintercept = `14 and 15`, linetype = '14 and 15'), color = 'tomato1', linewidth = 1) +
+  scale_linetype_manual(name = 'OHSI Thresholds', values = c('15 only' = 'dashed', '14 and 15' = 'dotted')) +
+  theme_minimal() +
+  theme(
+    legend.position = 'top',
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  ) + 
+  labs(
+    x = NULL, 
+    y = 'Oyster Acres'
+  )
+```
+
+Lastly, a comparison of oyster coverage relative to OHSI categories can also inform restoration priorities. The following provides an assessment of the percentage of oyster coverage currently within high priority OHSI categories relative to coverage that is not. The map below shows osyter coverage as of 2024 relative to OHSI categories 14 and 15 (note that geometries have been simplified slightly to improve map rendering).
+
+```{r}
+sgdat2024 <- rdataload('sgdat2024')
+oydat2024 <- sgdat2024 |> 
+  dplyr::filter(FLUCCSCODE == '6540') |> 
+  mutate(
+    FLUCCSCODE = 'Oysters'
+  ) |> 
+  st_simplify(dTolerance = 10) |> 
+  st_transform(crs = 4326)
+
+oydatsimp <- oydat |> 
+  st_simplify(dTolerance = 50) |> 
+  st_transform(crs = 4326)
+
+# Create color palette for osi values
+osi_colors <- colorFactor(
+  palette = c('lightblue', 'darkblue'), 
+  domain = oydat$osi
+)
+
+# Create the leaflet map
+leaflet() |>
+  # Add CartoDB Positron base layer
+  addProviderTiles(providers$CartoDB.Positron) |>
+  
+  # Add OHSI layer with osi coloring
+  addPolygons(
+    data = oydatsimp,
+    fillColor = ~osi_colors(osi),
+    fillOpacity = 0.7,
+    color = "transparent",  # No borders for performance
+    weight = 0,
+    group = "OHSI",
+    popup = ~paste0("OSI: ", osi)  # Optional popup
+  ) |>
+  
+  # Add 2024 Oyster Coverage layer
+  addPolygons(
+    data = oydat2024,
+    fillColor = "red",
+    fillOpacity = 0.7,
+    color = "transparent",  # No borders for performance
+    weight = 0,
+    group = "Oyster Coverage 2024",
+    popup = ~paste0("FLUCC: ", FLUCCSCODE)  # Optional popup
+  ) |>
+  
+  # Add layer controls
+  addLayersControl(
+    overlayGroups = c("OHSI", "Oyster Coverage 2024"),
+    options = layersControlOptions(collapsed = FALSE)
+  ) |>
+  
+  # Add legend for OHSI
+  addLegend(
+    pal = osi_colors,
+    values = oydat$osi,
+    title = "OHSI",
+    position = "bottomright",
+    group = "OHSI"
+  ) |>
+  
+  # Add simple legend for 2024 coverage (manual)
+  addLegend(
+    colors = "red",
+    labels = "Oyster Coverage 2024",
+    title = "2024 Coverage",
+    position = "bottomright"
+  )
+```
+
+<br>
+
+The next two plots provide a graphical summary of oyster coverage relative to OHSI categories 14 and 15 and oysters in neither OHSI category.  The second plot shows the percentage of the total OHSI categories 14 or 15 that include oysters.
+
+```{r}
+#| fig-cap: "Graphical Summary of Oyster Coverage Relative to OHSI Categories 14 and 15"
+#| fig-width: 7
+#| fig-height: 4
+
+toplo <- oysunion |> 
+  st_set_geometry(NULL) |> 
+  mutate(
+    segment = factor(segment, levels = rev(levs))
+  ) |> 
+  summarise(
+    acres = sum(acres), 
+    .by = c(FLUCCSCODE, segment, osi)
+  )
+
+toplo1 <- toplo |> 
+  select(segment, osi, acres) |> 
+  filter(osi %in% c('14', '15')) |> 
+  mutate(
+    osi = factor(osi, levels = c('15', '14'))
+  ) |> 
+  summarise(
+    acres = sum(acres), 
+    .by = c(segment, osi)
+  )
+toplo2 <- toplo |>
+  filter(FLUCCSCODE == 'Oyster') |> 
+  select(segment, osi, acres) |> 
+  mutate(    
+    osi = factor(osi, levels = c('Not 14 or 15', '15', '14'))
+  ) |>
+  summarise(
+    acres = sum(acres), 
+    .by = c(segment, osi)
+  )
+
+ggplot(toplo2, aes(x = acres, y = segment, fill = osi)) +
+  geom_col( position = 'stack', alpha = 0.85) +
+  scale_fill_manual(values = c('darkred', 'red', 'lightpink')) + # red scale
+  guides(fill = guide_legend(reverse = T)) + 
+  theme_minimal() +
+  theme(
+    legend.position = 'top',
+    panel.grid.major.y = element_blank()
+  ) + 
+  labs(
+    fill = 'Oyster Habitat Suitability Index', 
+    x = 'Acres',
+    y = NULL
+  )
+```
+
+```{r}
+#| fig-cap: "Percentage of Total Oyster Acres by OHSI Category"
+#| fig-width: 7
+#| fig-height: 4
+
+toplo3 <- inner_join(toplo1, toplo2, by = c('segment', 'osi')) |> 
+  mutate(
+    perc = acres.y / acres.x * 100,
+  )
+ggplot(toplo3, aes(x = perc, y = segment, fill = osi)) +
+  geom_col( position = 'dodge', alpha = 0.85) +
+  scale_fill_manual(values = c('darkblue', 'lightblue')) +
+  guides(fill = guide_legend(reverse = T)) + 
+  theme_minimal() +
+  theme(
+    legend.position = 'top',
+    panel.grid.major.y = element_blank()
+  ) + 
+  labs(
+    fill = 'Oyster Habitat Suitability Index', 
+    x = '% of Total Oyster Acres',
+    y = NULL
+  )
+  
+```
+
+<br> 
+
+The table below shows a tabular summary of oyster coverage by OHSI category 14, 15, and neither.
+
+```{r}
+totab <- toplo2 |> 
+  pivot_wider(
+    names_from = 'osi', 
+    values_from = 'acres', 
+    values_fill = 0
+  ) |> 
+  mutate(
+    Total = `14` + `15` + `Not 14 or 15`
+  ) |> 
+  select(segment, `14`, `15`, `Not 14 or 15`, Total)
+
+reactable(totab, 
+          columns = list(
+            segment = colDef(name = 'Bay Segment', footer = 'Total'), 
+            `14` = colDef(name = 'OHSI 14', footer = function(values) htmltools::tags$b(format(round(sum(values), 0), big.mark = ','))),
+            `15` = colDef(name = 'OHSI 15', footer = function(values) htmltools::tags$b(format(round(sum(values), 0), big.mark = ','))), 
+            `Not 14 or 15` = colDef(name = 'Not OHSI 14 or 15', footer = function(values) htmltools::tags$b(format(round(sum(values), 0), big.mark = ','))),
+            Total = colDef(footer = function(values) htmltools::tags$b(format(round(sum(values), 0), big.mark = ',')))
+          ),
+          defaultColDef = colDef(
+            format = colFormat(separators = TRUE, digits = 0), 
+            footerStyle = list(fontWeight = 'bold')
+          ),
+          columnGroups = list(colGroup('Acres', columns = c('14', '15', 'Not 14 or 15', 'Total'))),
+          defaultPageSize = 7,
+          highlight = TRUE,
+          striped = TRUE,
+          bordered = TRUE,
+          showPageSizeOptions = FALSE,
+          showSortable = FALSE
+  ) |> 
+  add_title(
+    "Oyster Coverage Total by bay segment and OHSI categories 14, 15, or neither", 
+    font_size = 15, 
+    font_color = 'grey', 
+    font_weight = 'normal'
+  )
+```
+
