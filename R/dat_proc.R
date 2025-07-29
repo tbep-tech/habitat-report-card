@@ -3,6 +3,8 @@
 library(tidyverse)
 library(here)
 library(sf)
+library(mapedit)
+library(mapview)
 
 source(here('R/funcs.R'))
 
@@ -72,18 +74,28 @@ oysterhsi <- st_read(pth, layer = 'TB_OHSI_Polygon') |>
 
 save(oysterhsi, file = here('data/oysterhsi.RData'), compress = 'xz')
 
-# SWFWMD oyster coverage by bay segment -------------------------------------------------------
+# manually correct swfwmdtbseg layer  ---------------------------------------------------------
 
+# manatee river portion is incomplete
 data('swfwmdtbseg', package = 'tbeptools')
-toint <- swfwmdtbseg |> 
+
+swfwmdtbsegcor <- editFeatures(swfwmdtbseg)
+
+save(swfwmdtbsegcor, file = here('data/swfwmdtbsegcor.RData'), compress = 'xz')
+
+  # SWFWMD oyster coverage by bay segment -------------------------------------------------------
+
+load(file = here('data/swfwmdtbsegcor.RData'))
+
+toint <- swfwmdtbsegcor |> 
   st_transform(crs = 6443)
 
 oysdat <- tibble(
-    yr = c(2014, 2016, 2018, 2020, 2022, 2024)
-  ) |> 
+  yr = c(2014, 2016, 2018, 2020, 2022, 2024)
+) |> 
   mutate(
     dat = purrr::map(yr, function(x){
-
+      
       dat <- rdataload(paste0('sgdat', x))
       
       cat(x, '\n')
@@ -105,19 +117,39 @@ oysdat <- tibble(
     acres = sum(acres, na.rm = TRUE),
     .by = c('yr', 'segment')
   )
-  
+
 save(oysdat, file = here('data/oysdat.RData'), compress = 'xz')
+
+# 2024 max oyster coverage --------------------------------------------------------------------
+
+# extra oyster data
+load(file = url('https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/oyse.RData'))
+
+# 2024 data, add extra
+sgdat2024 <- rdataload('sgdat2024')
+oydat2024 <- sgdat2024 |> 
+  dplyr::filter(FLUCCSCODE == '6540') |> 
+  mutate(
+    FLUCCSCODE = 'Oyster'
+  ) 
+oyse <- oyse |> 
+  mutate(FLUCCSCODE = 'Oyster') |> 
+  select(FLUCCSCODE, geometry = x)
+oydat2024 <- oydat2024 |> 
+  bind_rows(oyse)
+
+save(oydat2024, file = here('data/oydat2024.RData'), compress = 'xz')
 
 # 2024 oyster union with OHSI 14, 15 by bay segment -------------------------------------------
 
 load(file = here('data/oysterhsi.RData'))
-
-data(swfwmdtbseg, package = 'tbeptools')
+load(file = here('data/oydat2024.RData'))
+load(file = here('data/swfwmdtbsegcor.RData'))
 
 levs <- c('Old Tampa Bay', 'Hillsborough Bay', 'Middle Tampa Bay',
           'Lower Tampa Bay', 'Boca Ciega Bay', 'Terra Ceia Bay', 'Manatee River')
 
-toint <- swfwmdtbseg |> 
+toint <- swfwmdtbsegcor |> 
   st_transform(st_crs(oysterhsi))
 
 oydat <- oysterhsi |> 
@@ -130,10 +162,8 @@ oydat <- oysterhsi |>
     acres = as.numeric(units::set_units(st_area(Shape), 'acre'))
   ) 
 
-sgdat2024 <- rdataload('sgdat2024')
-oydat2024 <- sgdat2024 |> 
-  dplyr::filter(FLUCCSCODE == '6540') |> 
-  st_intersection(toint)
+oydat2024 <- oydat2024 |> 
+  st_intersection(toint) 
 
 a <- oydat2024 
 b <- oydat |> 
@@ -173,7 +203,7 @@ oysunion <- bind_rows(op1, op2, op3) |>
   mutate(
     FLUCCSCODE = case_when(
       is.na(FLUCCSCODE) ~ 'Not Oyster', 
-      FLUCCSCODE == '6540' ~ 'Oyster',
+      T ~ FLUCCSCODE
     ), 
     osi = case_when(
       is.na(osi) ~ 'Not 14 or 15', 
@@ -186,3 +216,23 @@ oysunion <- bind_rows(op1, op2, op3) |>
 rownames(oysunion) <- 1:nrow(oysunion)
 
 save(oysunion, file = here('data/oysunion.RData'))
+
+# 2022 max oyster coverage --------------------------------------------------------------------
+
+# extra oyster data, original FWC update from early 2024
+oyse <- rdataload('oyse', dataurl = 'https://github.com/tbep-tech/hmpu-workflow/raw/e34cc5a9503a0acede0eab9567d7bc9f4e6b4511/data/')
+
+sgdat2022 <- rdataload('sgdat2022')
+oydat2022 <- sgdat2022 |> 
+  dplyr::filter(FLUCCSCODE == '6540') |> 
+  mutate(
+    FLUCCSCODE = 'Oyster'
+  )
+oyse <- oyse |> 
+  mutate(FLUCCSCODE = 'Oyster') |> 
+  select(FLUCCSCODE, geometry = x)
+oydat2022 <- oydat2022 |> 
+  bind_rows(oyse)
+
+save(oydat2022, file = here('data/oydat2022.RData'), compress = 'xz')
+

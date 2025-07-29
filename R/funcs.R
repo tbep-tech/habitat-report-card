@@ -195,10 +195,11 @@ tab_prep <- function(dat, yrrng, allhab, collevs, collabs){
 
 # get datasets from hmpu-workflow repo
 # try simple load, download if fail
-rdataload <- function(x){
+rdataload <- function(x, dataurl = NULL){
   
   fl <- paste0(x, '.RData')
-  dataurl <- 'https://github.com/tbep-tech/hmpu-workflow/raw/master/data/'
+  if(is.null(dataurl))
+    dataurl <- 'https://github.com/tbep-tech/hmpu-workflow/raw/master/data/'
   flurl <- paste0(dataurl, fl)
   
   # try simple load
@@ -208,7 +209,7 @@ rdataload <- function(x){
   if(!inherits(ld, 'try-error')){
     out <- get(x)
   }
-  
+
   # download x if load failed
   if(inherits(ld, 'try-error')){
     

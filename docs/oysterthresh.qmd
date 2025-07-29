@@ -8,9 +8,8 @@ format:
     code-tools: 
       source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/oysterthresh.qmd
     css: styles.css
-    
+toc: true
 lightbox: true
-
 execute:
   echo: false
   warning: false
@@ -30,15 +29,15 @@ source(here('R/funcs.R'))
 load(file = here('data/oysterhsi.RData'))
 load(file = here('data/oysdat.RData'))
 load(file = here('data/oysunion.RData'))
-
-data(swfwmdtbseg, package = 'tbeptools')
+load(file = here('data/oydat2024.RData'))
+load(file = here('data/swfwmdtbsegcor.RData'))
 
 goal <- 471
 
 levs <- c('Old Tampa Bay', 'Hillsborough Bay', 'Middle Tampa Bay',
           'Lower Tampa Bay', 'Boca Ciega Bay', 'Terra Ceia Bay', 'Manatee River')
 
-toint <- swfwmdtbseg |> 
+toint <- swfwmdtbsegcor |> 
   st_transform(st_crs(oysterhsi))
 
 oydat <- oysterhsi |> 
@@ -52,7 +51,11 @@ oydat <- oysterhsi |>
   ) 
 ```
 
-Oyster acreage thresholds are based on the Habitat Master Plan goal of 471 acres by 2050.  Thresholds are defined separately for the seven bay segments in Old Tampa Bay using the Oyster Habitat Suitability Index, where categories 14 and 15 are considered ideal restoration potential for oysters.
+Oyster acreage thresholds are based on the Habitat Master Plan goal of 471 acres by 2050, where the total goal is divided among the seven bay segments.  Two options are provided 
+
+## Option 1: Proportional to OHSI
+
+Option 1 defines potential thresholds for the seven bay segments using the Oyster Habitat Suitability Index (OHSI). Categories 14 and 15 are considered ideal restoration potential for oysters and thresholds are based on the relative proportion of acres in each bay segment, where the sum of is 471 acres. Potential thresholds are based on proportions of just OHSI category 15 or categories 14 and 15.  This option assumes that restoration should be focused on areas with the highest OHSI categories or restoration potential, rather than areas where oysters have been present in the past.
 
 ```{r}
 #| fig-cap: "Graphical Summary of Oyster Habitat Suitability Index (OSI) 14 and 15 Acreage by Bay Segment"
@@ -110,12 +113,13 @@ reactable(totab,
             footerStyle = list(fontWeight = 'bold')
           ),
           columnGroups = list(colGroup('Acres', columns = c('14', '15', 'Total'))),
-          defaultPageSize = 7,
+          defaultPageSize = nrow(totab),
           highlight = TRUE,
           striped = TRUE,
           bordered = TRUE,
           showPageSizeOptions = FALSE,
-          showSortable = FALSE
+          showSortable = FALSE, 
+          resizable = TRUE
   ) |> 
   add_title(
     "Tabular Summary of Oyster Habitat Suitability Index (OHSI) 14 and 15 Acreage by Bay Segment", 
@@ -148,12 +152,13 @@ reactable(thrs,
             footerStyle = list(fontWeight = 'bold')
           ),
           columnGroups = list(colGroup('Acres', columns = c('15 only', '14 and 15'))),
-          defaultPageSize = 7,
+          defaultPageSize = nrow(thrs),
           highlight = TRUE,
           striped = TRUE,
           bordered = TRUE,
           showPageSizeOptions = FALSE,
-          showSortable = FALSE
+          showSortable = FALSE,
+          resizable = TRUE
   ) |> 
   add_title(
     "Potential Oyster Thresholds by Bay Segment based on a 2050 Goal of 471 Acres Set Proportionally by OHSI Categories (15 only, 14 and 15 Combined)", 
@@ -197,15 +202,9 @@ ggplot(toplo, aes(x = yr, y = acres)) +
 Lastly, a comparison of oyster coverage relative to OHSI categories can also inform restoration priorities. The following provides an assessment of the percentage of oyster coverage currently within high priority OHSI categories relative to coverage that is not. The map below shows osyter coverage as of 2024 relative to OHSI categories 14 and 15 (note that geometries have been simplified slightly to improve map rendering).
 
 ```{r}
-sgdat2024 <- rdataload('sgdat2024')
-oydat2024 <- sgdat2024 |> 
-  dplyr::filter(FLUCCSCODE == '6540') |> 
-  mutate(
-    FLUCCSCODE = 'Oysters'
-  ) |> 
-  st_simplify(dTolerance = 10) |> 
-  st_transform(crs = 4326)
 
+oydat2024 <- oydat2024 |> 
+  st_transform(crs = 4326)
 oydatsimp <- oydat |> 
   st_simplify(dTolerance = 50) |> 
   st_transform(crs = 4326)
@@ -343,7 +342,7 @@ ggplot(toplo3, aes(x = perc, y = segment, fill = osi)) +
   ) + 
   labs(
     fill = 'Oyster Habitat Suitability Index', 
-    x = '% of Total Oyster Acres',
+    x = '% of OHSI Category with Oyster Acres',
     y = NULL
   )
   
@@ -378,12 +377,13 @@ reactable(totab,
             footerStyle = list(fontWeight = 'bold')
           ),
           columnGroups = list(colGroup('Acres', columns = c('14', '15', 'Not 14 or 15', 'Total'))),
-          defaultPageSize = 7,
+          defaultPageSize = nrow(totab),
           highlight = TRUE,
           striped = TRUE,
           bordered = TRUE,
           showPageSizeOptions = FALSE,
-          showSortable = FALSE
+          showSortable = FALSE, 
+          resizable = TRUE
   ) |> 
   add_title(
     "Oyster Coverage Total by bay segment and OHSI categories 14, 15, or neither", 
@@ -393,3 +393,6 @@ reactable(totab,
   )
 ```
 
+## Option 2: Proportional to maximum oyster coverage
+
+The second option estimates thresholds based on the proportion of maximum oyster coverage by bay segment, where the sum of the proportions is 471 acres.  This approach assumes that thresholds should be based on areas where oysters have been present or what is more easily attainable, rather than the OHSI categories.  Maximum oyster coverage was observed in 2022.
