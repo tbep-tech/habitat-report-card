@@ -528,7 +528,7 @@ reactable(totabfin,
           resizable = TRUE
 ) |> 
   add_title(
-    "Relative effort to achieve potential thresholds under both options.  Values shown are acres to go for each threshold, with the proportion of the current acres in parentheses (i.e., 1 = current acreage must double to achieve threshold).", 
+    "Relative effort to achieve potential thresholds under both options.  Values shown are acres to go for each threshold, with the proportion of the current acres in parentheses (i.e., 1 = current acreage must double to achieve threshold). The total for the 'Current acres' column plus the total for any of the columns for option 1 or option 2 will equal 471 acres.", 
     font_size = 15, 
     font_color = 'grey', 
     font_weight = 'normal'
