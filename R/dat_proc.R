@@ -120,7 +120,7 @@ oysdat <- tibble(
 
 save(oysdat, file = here('data/oysdat.RData'), compress = 'xz')
 
-# 2024 max oyster coverage --------------------------------------------------------------------
+# 2024 oyster coverage ------------------------------------------------------------------------
 
 # extra oyster data
 load(file = url('https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/oyse.RData'))
@@ -219,6 +219,11 @@ save(oysunion, file = here('data/oysunion.RData'))
 
 # 2022 max oyster coverage --------------------------------------------------------------------
 
+load(file = here('data/swfwmdtbsegcor.RData'))  
+
+toint <- swfwmdtbsegcor |> 
+  st_transform(crs = 6443)
+
 # extra oyster data, original FWC update from early 2024
 oyse <- rdataload('oyse', dataurl = 'https://github.com/tbep-tech/hmpu-workflow/raw/e34cc5a9503a0acede0eab9567d7bc9f4e6b4511/data/')
 
@@ -232,7 +237,11 @@ oyse <- oyse |>
   mutate(FLUCCSCODE = 'Oyster') |> 
   select(FLUCCSCODE, geometry = x)
 oydat2022 <- oydat2022 |> 
-  bind_rows(oyse)
+  bind_rows(oyse) |> 
+  st_intersection(toint) |>
+  mutate(
+    acres = as.numeric(units::set_units(st_area(geometry), 'acre'))
+  ) 
 
 save(oydat2022, file = here('data/oydat2022.RData'), compress = 'xz')
 
