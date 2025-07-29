@@ -479,7 +479,7 @@ Both options use different approaches to developing thresholds.  Option 1 priori
 
 * Option 2 provides a more equitable distribution of thresholds across the bay segments, whereas option 1 provides lower priority to bay segments with higher oyster coverage compared to others.  
 
-* Option 1 also provides two alternatives, one using both OHSI categories 14 and 15 or only category 15.  Differences in thresholds using either alternative vary by bay segment.
+* Option 1 also provides two alternatives, one using both OHSI categories 14 and 15 or only category 15.  Differences in thresholds using either alternative vary by bay segment -- one alternative is not consistently higher or lower than the other.
 
 * Option 2 is inclusive of the recommended 175 acres of restoration in Old Tampa Bay under the assimilative capacity project.
 
@@ -528,7 +528,7 @@ reactable(totabfin,
           resizable = TRUE
 ) |> 
   add_title(
-    "Relative effort to achieve potential thresholds under both options.  Values shown are acres to go for each threshold, with the proportion of the current acres in parentheses (i.e. 1 = current acreage must double to achieve threshold", 
+    "Relative effort to achieve potential thresholds under both options.  Values shown are acres to go for each threshold, with the proportion of the current acres in parentheses (i.e., 1 = current acreage must double to achieve threshold).", 
     font_size = 15, 
     font_color = 'grey', 
     font_weight = 'normal'
