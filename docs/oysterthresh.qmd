@@ -178,10 +178,10 @@ An assessment of trends in oyster acreage by bay segment relative to the potenti
 #| fig-width: 7
 #| fig-height: 7
 
-toplo <- oysdat |> 
+toploop1 <- oysdat |> 
   left_join(thrs, by = 'segment')
 
-ggplot(toplo, aes(x = yr, y = acres)) + 
+ggplot(toploop1, aes(x = yr, y = acres)) + 
   geom_col(alpha = 0.85, fill = '#00806E') + 
   facet_wrap(~segment, ncol = 3) +
   scale_x_continuous(breaks = c(2014, 2016, 2018, 2020, 2022, 2024)) +
@@ -448,10 +448,10 @@ Finally, the potential threshold based on maximum observed can be viewed relativ
 #| fig-width: 7
 #| fig-height: 7
 
-toplo <- oysdat |> 
+toploop2 <- oysdat |> 
   left_join(totab |> select(segment, thrsh), by = 'segment')
 
-ggplot(toplo, aes(x = yr, y = acres)) + 
+ggplot(toploop2, aes(x = yr, y = acres)) + 
   geom_col(alpha = 0.85, fill = '#00806E') + 
   facet_wrap(~segment, ncol = 3) +
   scale_x_continuous(breaks = c(2014, 2016, 2018, 2020, 2022, 2024)) +
@@ -483,6 +483,56 @@ Both options use different approaches to developing thresholds.  Option 1 priori
 
 * Option 2 is inclusive of the recommended 175 acres of restoration in Old Tampa Bay under the assimilative capacity project.
 
-Using the current oyster coverage, the following table shows the percent increase (or decrease) in oyster coverage to achieve thresholds under both options.
+Using the current oyster coverage, the following table shows the necessary increase (or decrease if already attained) in oyster coverage to achieve potential thresholds under both options.
 
+```{r}
+totabfin <- inner_join(toploop1, toploop2, by = c('yr', 'segment', 'acres')) |> 
+  filter(yr == 2024) |> 
+  select(segment, acres, `14 and 15`, `15 only`, `Max observed` = thrsh) |>
+  pivot_longer(
+    cols = c("14 and 15", "15 only", "Max observed"),
+    names_to = 'var',
+    values_to = 'val'
+  ) |>
+  mutate(
+    acrechg = val - acres,
+    propchg = paste0('(', round(acrechg / acres, 2), ')'),
+    acrechg = format(round(acrechg, 0), big.mark = ','),
+  ) |> 
+  select(-val) |> 
+  unite('chg', acrechg, propchg, sep = ' ') |>
+  pivot_wider(
+    names_from = var,
+    values_from = chg
+  ) |> 
+  arrange(segment)
+
+reactable(totabfin, 
+          columns = list(
+            segment = colDef(name = 'Bay aegment'),
+            acres = colDef(name = 'Current acres')
+          ),
+          defaultColDef = colDef(
+            format = colFormat(separators = TRUE, digits = 0)
+          ),
+          columnGroups = list(
+            colGroup('Option 1', columns = c('14 and 15', '15 only')), 
+            colGroup('Option 2', columns = c('Max observed'))
+            ),
+          defaultPageSize = nrow(totabfin),
+          highlight = TRUE,
+          striped = TRUE,
+          bordered = TRUE,
+          showPageSizeOptions = FALSE,
+          showSortable = FALSE, 
+          resizable = TRUE
+) |> 
+  add_title(
+    "Relative effort to achieve potential thresholds under both options.  Values shown are acres to go for each threshold, with the proportion of the current acres in parentheses (i.e. 1 = current acreage must double to achieve threshold", 
+    font_size = 15, 
+    font_color = 'grey', 
+    font_weight = 'normal'
+  )
+
+```
 
