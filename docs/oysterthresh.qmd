@@ -100,7 +100,8 @@ totab <- toplo |>
   ) |> 
   mutate(
     Total = `14` + `15`
-  )
+  ) |> 
+  arrange(desc(segment))
 
 reactable(totab, 
           columns = list(
@@ -363,7 +364,8 @@ totab <- toplo2 |>
   mutate(
     Total = `14` + `15` + `Not 14 or 15`
   ) |> 
-  select(segment, `14`, `15`, `Not 14 or 15`, Total)
+  select(segment, `14`, `15`, `Not 14 or 15`, Total) |> 
+  arrange(desc(segment))
 
 reactable(totab, 
           columns = list(
