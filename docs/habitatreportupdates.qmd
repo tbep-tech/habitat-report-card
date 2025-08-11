@@ -1,0 +1,134 @@
+---
+title: "Habitat Report Card Updates"
+author: "Tampa Bay Estuary Program"
+date: "`r Sys.Date()`"
+format:
+  html:
+    theme: cosmo
+    code-tools: 
+      source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/oysterthresh.qmd
+    css: styles.css
+    embed-resources: true
+toc: true
+lightbox: true
+execute:
+  echo: false
+  warning: false
+---
+
+```{r}
+#| include: false
+library(tidyverse)
+library(forcats)
+library(foreign)
+library(reactable)
+library(here)
+library(networkD3)
+library(reactablefmtr)
+library(highcharter)
+
+# source functions and data from https://github.com/tbep-tech/landuse-change
+source('https://github.com/tbep-tech/landuse-change/raw/refs/heads/master/R/funcs.R')
+
+load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/master/data/acres.RData'))
+load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/master/data/subtacres.RData'))
+load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/master/data/chgdat.RData'))
+load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/master/data/subtchgdat.RData'))
+load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/master/data/fluccs.RData'))
+```
+
+## Habitat Report Card
+
+![](figs/hmpreport.png)
+
+## Summary of land use and subtidal changes
+
+### Land use
+
+```{r}
+acres |> 
+    filter(name %in% c(2020, 2023)) |> 
+    lngtrmtab_fun('Category', yrsel = c('2020', '2023'))
+```
+
+### Subtidal
+
+```{r}
+subtacres |> 
+    filter(name %in% c(2022, 2024)) |> 
+    lngtrmtab_fun('Category', yrsel = c('2022', '2024'))
+```
+
+## Changes by habitat
+
+```{r}
+toplo <- acres |> 
+    ungroup() |> 
+    arrange(HMPU_TARGETS) |> 
+    mutate(
+        chgv = sign(c(NA, diff(Acres))), 
+        chgv = factor(chgv, levels = c(-1, 0, 1), labels = c('dec', 'no change', 'inc')),
+        .by = c(HMPU_TARGETS)
+    )
+
+create_barplot <- function(target_data, target_name) {
+  # Define colors based on change direction
+  colors <- ifelse(is.na(target_data$chgv), "#95a5a6",  # gray for NA
+                  ifelse(target_data$chgv == "inc", "#27ae60",  # green for increase
+                         "#e74c3c"))  # red for decrease
+  
+  hc <- highchart() |>
+    hc_chart(type = "column") |>
+    hc_title(text = target_name) |>
+    hc_xAxis(categories = target_data$name) |>
+    hc_yAxis(title = list(text = "Acres")) |>
+    hc_add_series(
+      data = target_data$Acres,
+      name = "Acres",
+      colorByPoint = TRUE,
+      colors = colors
+    ) |>
+    hc_tooltip(
+      pointFormat = "<b>{point.y:,.0f}</b> acres<br/>",
+      headerFormat = "<span style='font-size:10px'>{point.key}</span><br/>"
+    ) |>
+    hc_plotOptions(
+      column = list(
+        dataLabels = list(
+          enabled = TRUE,
+          format = "{y:,.0f}"
+        )
+      )
+    ) |>
+    hc_legend(enabled = FALSE) |>
+    hc_credits(enabled = FALSE)
+  
+  return(hc)
+}
+```
+
+```{r all-plots}
+#| fig-width: 12
+#| fig-height: 4
+#| results: asis
+
+# Get unique HMPU_TARGETS
+unique_targets <- unique(toplo$HMPU_TARGETS)
+
+# Create a list of plots (one for each HMPU_TARGET)
+plots_list <- map(unique_targets, function(target) {
+  target_data <- toplo |> filter(HMPU_TARGETS == target)
+  create_barplot(target_data, target)
+})
+
+plots_list[[1]]
+plots_list[[2]]
+plots_list[[3]]
+plots_list[[4]]
+plots_list[[5]]
+plots_list[[6]]
+plots_list[[7]]
+plots_list[[8]]
+plots_list[[9]]
+plots_list[[10]]
+```
