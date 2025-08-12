@@ -35,6 +35,9 @@ load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/mast
 load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/master/data/chgdat.RData'))
 load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/master/data/subtchgdat.RData'))
 load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/master/data/fluccs.RData'))
+
+lucats <- c('Mangrove Forests', 'Salt Barrens', 'Salt Marshes', 'Coastal Uplands', 'Non-Forested Freshwater Wetlands', 'Forested Freshwater Wetlands', 'Native Uplands')
+sbcats <- c('Tidal Flats', 'Seagrasses', 'Oyster Bars')
 ```
 
 ## Habitat Report Card
@@ -48,6 +51,7 @@ load(file = url('https://github.com/tbep-tech/landuse-change/raw/refs/heads/mast
 ```{r}
 acres |> 
     filter(name %in% c(2020, 2023)) |> 
+    filter(HMPU_TARGETS %in% lucats) |> 
     lngtrmtab_fun('Category', yrsel = c('2020', '2023'))
 ```
 
@@ -56,22 +60,23 @@ acres |>
 ```{r}
 subtacres |> 
     filter(name %in% c(2022, 2024)) |> 
+    filter(HMPU_TARGETS %in% sbcats) |>
     lngtrmtab_fun('Category', yrsel = c('2022', '2024'))
 ```
 
 ## Changes by habitat
 
 ```{r}
-toplo <- acres |> 
+create_barplot <- function(target_data, target_name) {
+  
+  target_data <- target_data |> 
     ungroup() |> 
-    arrange(HMPU_TARGETS) |> 
+    filter(HMPU_TARGETS == !!target_name) |> 
     mutate(
         chgv = sign(c(NA, diff(Acres))), 
         chgv = factor(chgv, levels = c(-1, 0, 1), labels = c('dec', 'no change', 'inc')),
-        .by = c(HMPU_TARGETS)
     )
 
-create_barplot <- function(target_data, target_name) {
   # Define colors based on change direction
   colors <- ifelse(is.na(target_data$chgv), "#95a5a6",  # gray for NA
                   ifelse(target_data$chgv == "inc", "#27ae60",  # green for increase
@@ -107,18 +112,15 @@ create_barplot <- function(target_data, target_name) {
 }
 ```
 
-```{r all-plots}
+### Land use
+
+```{r}
 #| fig-width: 12
 #| fig-height: 4
 #| results: asis
 
-# Get unique HMPU_TARGETS
-unique_targets <- unique(toplo$HMPU_TARGETS)
-
-# Create a list of plots (one for each HMPU_TARGET)
-plots_list <- map(unique_targets, function(target) {
-  target_data <- toplo |> filter(HMPU_TARGETS == target)
-  create_barplot(target_data, target)
+plots_list <- map(lucats, function(lucat) {
+  create_barplot(acres, lucat)
 })
 
 plots_list[[1]]
@@ -128,7 +130,20 @@ plots_list[[4]]
 plots_list[[5]]
 plots_list[[6]]
 plots_list[[7]]
-plots_list[[8]]
-plots_list[[9]]
-plots_list[[10]]
+```
+
+### Subtidal
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4
+#| results: asis
+
+plots_list <- map(sbcats, function(sbcat) {
+  create_barplot(subtacres, sbcat)
+})
+
+plots_list[[1]]
+plots_list[[2]]
+plots_list[[3]]
 ```
