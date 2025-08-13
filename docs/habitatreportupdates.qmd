@@ -1,5 +1,5 @@
 ---
-title: "Habitat Report Card Updates"
+title: "Habitat Updates"
 author: "Tampa Bay Estuary Program"
 date: "`r Sys.Date()`"
 format:
@@ -40,19 +40,29 @@ lucats <- c('Mangrove Forests', 'Salt Barrens', 'Salt Marshes', 'Coastal Uplands
 sbcats <- c('Tidal Flats', 'Seagrasses', 'Oyster Bars')
 ```
 
-This short summary provides an update on habitats in Tampa Bay and its watershed using the msot recent data available.  These data include 2024 subtidal data and 2023 land use/cover data from the Southwest Florida Water Management Distric (SWFWMD).  The goal is to describe the most recent status and trends to facilitate a discussion on identifying priorities for the Habitat Restoration Consortium (HRC). 
+This short summary provides an update on habitats in Tampa Bay and its watershed using the most recent data available.  These data include 2024 subtidal data and 2023 land use/cover data (intertidal/supratidal) from the Southwest Florida Water Management District (SWFWMD).  The goal is to describe the most recent status and trends to facilitate a discussion on identifying priorities for the Habitat Restoration Consortium (HRC). 
 
-## Habitat Report Card
+Habitat strata terms:
+
+* **Subtidal**: Submerged all or most of the time - tidal flats, seagrasses, oyster bars
+* **Intertidal**: Emergent tidal wetlands submerged during high tides but exposed during low tides - mangrove forests, salt barrens, salt marshes
+* **Supratidal**: Occuring above the high tide line - coastal uplands, non-forested freshwater wetlands, forested freshwater wetlands, native uplands
+
+## Habitat Master Plan
  
-The habitat report card is used to summarize status and trends of key habitats with prescribed short-term (2030) targets and long-term (2050) goals in acreage coverage.  Below shows the current report card and progress in achieving short-term targets, dividing the habitats into subtidal, intertidal, and supratidal strata.  Colors denote whether a target is achieved (green) or not achieved (red) for a given year of data and the arrows indicating whether the target is expected to be met (up) or not expected to be met (down) based on the linear trend between year pairs. Note that it does not indicate a decrease or increase between year pairs (e.g., the trend may still suggest a target will not be met with a down arrow even if a gain in acreage between year pairs occurred).
+The plot below is used to summarize status and trends of key habitats with prescribed short-term (2030) targets and long-term (2050) goals in acreage coverage defined in the TBEP [Habitat Master Plan](https://drive.google.com/file/d/1Hp0l_qtbxp1JxKJoGatdyuANSzQrpL0I/view).  The plot shows current progress in achieving short-term targets, dividing the habitats into subtidal, intertidal, and supratidal strata.  Colors denote whether a target is achieved (green) or not achieved (red) for a given year of data and the arrows indicate whether the target is expected to be met (up) or not expected to be met (down) by 2030 based on the linear trend between year pairs. Note that the report card does not indicate an absolute decrease or increase between year pairs (e.g., the trend may suggest a target will not be met with a down arrow even if a gain in acreage between year pairs occurred).
 
 ![](figs/hmpreport.png)
+
+A table showing the numeric targets (goals) and current acreage relative to the targets (goals) for each habitat type can be viewed [here](tabs/target_table_simple_no_total_intertidal.png). 
 
 ## Summary of land use and subtidal changes
 
 The tables below show the absolute changes in acreage from the most current year of data with the previous. Red denotes a loss and green denotes a gain.
 
-### Subtidal
+::: {.panel-tabset .nav-pills}
+
+## Subtidal
 
 ```{r}
 subtacres |> 
@@ -61,7 +71,7 @@ subtacres |>
     lngtrmtab_fun('Category', yrsel = c('2022', '2024'))
 ```
 
-### Intertidal and supratidal
+## Intertidal and supratidal
 
 ```{r}
 acres |> 
@@ -70,9 +80,13 @@ acres |>
     lngtrmtab_fun('Category', yrsel = c('2020', '2023'))
 ```
 
+:::
+
 ## Changes by habitat
 
-The plots below show all years of data, with bars colored where an increase (green) or decrease (red) was observed from the previous year.
+The plots below show all years of data for each habitat type, with bars colored when an decrease (red) or increase (green) was observed from the previous year.
+
+::: {.panel-tabset .nav-pills}
 
 ```{r}
 create_barplot <- function(target_data, target_name) {
@@ -120,7 +134,7 @@ create_barplot <- function(target_data, target_name) {
 }
 ```
 
-### Subtidal
+## Subtidal
 
 ```{r}
 #| fig-width: 12
@@ -136,7 +150,7 @@ plots_list[[2]]
 plots_list[[3]]
 ```
 
-### Intertidal and Supratidal
+## Intertidal and Supratidal
 
 ```{r}
 #| fig-width: 12
@@ -155,3 +169,20 @@ plots_list[[5]]
 plots_list[[6]]
 plots_list[[7]]
 ```
+
+:::
+
+## Summary
+
+The 2024 [habitat report card](https://drive.google.com/file/d/1yrq8M5CA_LqM0DRqmtYY1IJDjD4VJY2l/view) identified seagrasses, salt marsh, and forested freshwater wetlands as priority habitats for restoration and conservation efforts based on trends from the prior year's data.  Following the current data updates, priorities are more difficult to identify. Using only the information above, the following conclusions can be made.  Potential priorities are those where the target is not likely to be met and the coverage is currently below the target.
+
+* **Tidal Flats**: Likely to meet target, currently above target.
+* **Seagrasses**: Not likely to meet target, currently below target, but saw an increase in acreage in 2024. **Priority?**
+* **Oyster Bars**: Not likely to meet target, currently below target following decline from previously mapping cycle. **Priority?**
+* **Mangrove Forests**: Not likely to meet target, currently above target.
+* **Salt Barrens**: Likely to meet taget, currently above target.
+* **Salt Marshes**: Not likely to meet target, currently below target. **Priority?**
+* **Coastal Uplands**: Not likely to meet target, currently below target. **Priority?**
+* **Non-Forested Freshwater Wetlands**: Likely to meet target, currently above target.
+* **Forested Freshwater Wetlands**: Not likely to meet target, currently below target. **Priority?**
+* **Native Uplands**: Not likely to meet target, currently below target. **Priority?**
