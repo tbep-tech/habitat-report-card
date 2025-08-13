@@ -106,6 +106,9 @@ create_barplot <- function(target_data, target_name) {
   
   hc <- highchart() |>
     hc_chart(type = "column") |>
+    highcharter::hc_add_theme(
+      highcharter::hc_theme(chart = list(backgroundColor = 'white'))
+    ) |> 
     hc_title(text = target_name) |>
     hc_xAxis(categories = target_data$name) |>
     hc_yAxis(title = list(text = "Acres")) |>
@@ -128,7 +131,16 @@ create_barplot <- function(target_data, target_name) {
       )
     ) |>
     hc_legend(enabled = FALSE) |>
-    hc_credits(enabled = FALSE)
+    hc_credits(enabled = FALSE) |> 
+    hc_exporting(
+      enabled = TRUE,
+      filename = "myplot",
+      buttons = list(
+        contextButton = list(
+          menuItems = c("viewFullscreen", "downloadPNG", "downloadCSV")
+        )
+      )
+    )
   
   return(hc)
 }
