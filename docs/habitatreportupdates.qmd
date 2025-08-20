@@ -6,7 +6,7 @@ format:
   html:
     theme: cosmo
     code-tools: 
-      source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/oysterthresh.qmd
+      source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/habitatreportupdates.qmd
     css: styles.css
     embed-resources: true
 toc: true
