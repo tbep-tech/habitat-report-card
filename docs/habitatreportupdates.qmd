@@ -56,7 +56,7 @@ The plot below is used to summarize status and trends of key habitats with presc
 
 A table showing the numeric targets (goals) and current acreage relative to the targets (goals) for each habitat type can be viewed [here](tabs/target_table_simple_no_total_intertidal.png). 
 
-## Summary of land use and subtidal changes
+## Tabular summary of coverage changes
 
 The tables below show the absolute changes in acreage from the most current year of data with the previous. Red denotes a loss and green denotes a gain.
 
@@ -82,7 +82,7 @@ acres |>
 
 :::
 
-## Changes by habitat
+## Graphical summary of coverage changes
 
 The plots below show all years of data for each habitat type, with bars colored when an decrease (red) or increase (green) was observed from the previous year.
 
@@ -186,7 +186,7 @@ plots_list[[7]]
 
 ## Summary
 
-The 2024 [habitat report card](https://drive.google.com/file/d/1yrq8M5CA_LqM0DRqmtYY1IJDjD4VJY2l/view) identified seagrasses, salt marsh, and forested freshwater wetlands as priority habitats for restoration and conservation efforts based on trends from the prior year's data.  Following the current data updates, priorities are more difficult to identify. Using only the information above, the following conclusions can be made.  Potential priorities are those where the target is not likely to be met and the coverage is currently below the target.
+The 2024 [habitat report card](https://drive.google.com/file/d/1yrq8M5CA_LqM0DRqmtYY1IJDjD4VJY2l/view) identified seagrasses, salt marsh, and forested freshwater wetlands as priority habitats for restoration and conservation efforts based on trends from the prior year's data.  Following the current data updates, priorities are more difficult to identify. Using only the information above, the following conclusions can be made.  Potential priorities are those where the target is not likely to be met and the coverage is currently below the target, although additional considerations can be made.
 
 * **Tidal Flats**: Likely to meet target, currently above target.
 * **Seagrasses**: Not likely to meet target, currently below target, but saw an increase in acreage in 2024. **Priority?**
