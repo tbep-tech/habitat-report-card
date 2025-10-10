@@ -2,7 +2,7 @@
 
 Materials for creating a habitat report card for the Habitat Master Plan and Habitat Restoration Consortium
 
-Report card: [link](https://drive.google.com/file/d/1Y9pC6CjPYlTYBMo_mOdgY5JLDa8JMImB/view)
+Report card: [link](https://drive.google.com/file/d/1yrq8M5CA_LqM0DRqmtYY1IJDjD4VJY2l/view)
 
 Tables and figures: [link](https://tbep-tech.github.io/habitat-report-card/summaries.html)
 
