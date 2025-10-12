@@ -14,13 +14,14 @@ Habitat Report Card Update: [link](https://tbep-tech.github.io/habitat-report-ca
 
 ## Updatings tables and figures
 
-The tables and figures link above can be updated as source material for the habitat report card. This should be done each year once the file `restoration.csv` is updated in the [TBEP_Habitat_Restoration](https://github.com/tbep-tech/TBEP_Habitat_Restoration?tab=readme-ov-file#updating-restorationcsv) repository. The data can also be updated with new SWFWMD land use land cover maps, approximately every three years (the restoration potential map should also be updated with these new data). Follow the steps below to update the tables and figures.  These files depend on many R packages, so you will likely need to install them before running.
+The tables and figures link above can be updated as source material for the habitat report card. This should be done each year once the file `restoration.csv` is updated in the [TBEP_Habitat_Restoration](https://github.com/tbep-tech/TBEP_Habitat_Restoration?tab=readme-ov-file#updating-restorationcsv) repository. The data can also be updated with new SWFWMD land use land cover maps, approximately every three years (the restoration potential map should also be updated with these new data). Follow the steps below to update the tables and figures.  These files depend on many R packages, so you will likely need to install (or update) them before running.
 
 1. Pull the latest version of the repository to your local machine.
 1. Make sure the latest version of tbeptools is installed.
     ```r
     install.packages('tbeptools', repos = c('https://tbep-tech.r-universe.dev', 'https://cloud.r-project.org'))
     ```
+1. Make sure ImageMagick is installed and available in your system's path.  It can be downloaded from here: <https://imagemagick.org/script/download.php#windows>
 1. Run all of the contents in the file [`R/dat_proc.R`](https://github.com/tbep-tech/habitat-report-card/blob/main/R/dat_proc.R) down to [line 45](https://github.com/tbep-tech/habitat-report-card/blob/623ce63c57a2f765752fab3cec4cc99cf3cd67d2/R/dat_proc.R#L45).  This retrieves the file `restoration.csv`, formats it, and saves it as an updated file called `data/rstdatall.RData` for creating the tables and figures.
 1. Run all of the contents in the file [`R/figs.R`](https://github.com/tbep-tech/habitat-report-card/blob/main/R/figs.R).  This creates multiple figures that are placed in [`docs/figs`](https://github.com/tbep-tech/habitat-report-card/tree/main/docs/figs), which are used in the rendered Quarto file and can also be used as standalone files. 
 1. Run all of the contents in the file [`R/tabs.R`](https://github.com/tbep-tech/habitat-report-card/blob/main/R/tabs.R).  This creates multiple tables that are placed in [`docs/tabs`](https://github.com/tbep-tech/habitat-report-card/tree/main/docs/tabs), which are used in the rendered Quarto file and can also be used as standalone files.
