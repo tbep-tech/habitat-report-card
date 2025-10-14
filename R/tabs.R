@@ -7,6 +7,8 @@ library(sf)
 library(units)
 library(flextable)
 library(webshot2)
+library(chromote)
+options(chromote.headless = "new")
 
 source(here('R/funcs.R'))
 
