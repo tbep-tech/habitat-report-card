@@ -59,6 +59,8 @@ download.file(
   url = "https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/trgs.RData",
   destfile = here("Data/trgs.RData")
 )
+load(url('https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/trgs.RData'))
+
 
 #summarize habitat restoration by habitat type for 2020-current year;
 data_filtered <- rstdatall%>%
@@ -105,4 +107,101 @@ restore_pct <- restored %>%
   mutate(AcrestoGo=Target2030-(sum_acres+acres_LULC),
          MilestoGo=Target2030-sum_miles)
   
+
+############ stupid long version
+
+load(url('https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/acres.RData'))
+load(url('https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/subtacres.RData'))
+load(url('https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/trgs.RData'))
+
+trgshr <- trgs |> 
+  select(HMPU_TARGETS, Target2030)
+
+pth <- 'https://raw.githubusercontent.com/tbep-tech/TBEP_Habitat_Restoration/main/restoration.csv'
+
+strdat <- bind_rows(
+    filter(acres, name == 2017),
+    filter(subtacres, name == 2018)
+  ) |>
+  ungroup() |> 
+  select(-name) |> 
+  rbind(
+    tibble(
+      HMPU_TARGETS = c('Artificial Reefs', 'Hard Bottom', 'Tidal Tributaries', 'Living Shorelines'),
+      Acres = c(166, 423, 387, 11.3)
+    )
+  ) |> 
+  rename(start = Acres) |> 
+  filter(HMPU_TARGETS %in% c(trgshr$HMPU_TARGETS))
+
+
+curdat <- read.csv(pth, stringsAsFactors = F) %>% 
+  select(
+    Year = Federal_Fiscal_Year,
+    Partner = Lead_Implementer,
+    Lat = Latitude, 
+    Lon = Longitude,
+    Restoration_Technique,
+    Primary = PrimaryHabitat,
+    General = GeneralHabitat,
+    Activity = GeneralActivity,
+    Acres,
+    Miles,
+    Feet
+  ) %>%
+  mutate(
+    Miles = case_when(
+      Activity %in% 'Maintenance' & Restoration_Technique %in% 'Debris Removal' ~ NA_real_,
+      T ~ Miles
+    ),
+    Acres = as.numeric(Acres),
+    Miles = case_when(
+      is.na(Miles) & !is.na(Feet) ~ Feet / 5280,
+      T ~ Miles
+    ),
+    General = case_when(
+      General == 'estuarine' ~ 'Estuarine', 
+      grepl('^Upland', General) ~ 'Uplands',
+      grepl('^Mix|^Other', General) ~ 'Mixed', 
+      T ~ General
+    ), 
+    General = ifelse(General == '', NA, General),
+    Primary = ifelse(Primary == '', NA, Primary),
+    Activity = ifelse(Activity == '', NA, Activity)
+  ) %>% 
+  select(Year, Primary, Activity, Acres, Miles) |> 
+  filter(Activity == 'Restoration') |> 
+  filter(Year >= 2017 & Year <= 2025,
+         Activity=="Restoration")%>%
+  rename(HMPU_TARGETS=Primary)%>%
+  mutate(HMPU_TARGETS = case_when(
+    HMPU_TARGETS == "Low-Salinity Salt Marsh" ~ "Salt Marshes",
+    HMPU_TARGETS == "Non-forested Freshwater Wetlands" ~ "Non-Forested Freshwater Wetlands",
+    HMPU_TARGETS == "Uplands (Non-coastal)" ~ "Native Uplands",
+    HMPU_TARGETS == "Intertidal Estuarine (Other)" ~ "Total Intertidal",
+    TRUE ~ HMPU_TARGETS
+  )) |> 
+  summarise(
+    Acres = sum(Acres, na.rm=TRUE),
+    Miles = sum(Miles, na.rm=TRUE),
+    .by=c(Year, HMPU_TARGETS)
+  ) |> 
+  tidyr::complete(Year = 2017:2025, HMPU_TARGETS, fill=list(Acres=0, Miles=0)) |> 
+  mutate(
+    progress = case_when(
+      HMPU_TARGETS %in% c('Tidal Tributaries', 'Living Shorelines') ~ Miles, 
+      TRUE ~ Acres
+    )
+  ) |> 
+  select(-Miles, -Acres) |> 
+  filter(!(HMPU_TARGETS %in% c('Artificial Reefs', 'Oyster Bars', 'Hard Bottom', 'Seagrasses', 'Tidal Flats') & Year == 2017)) |> 
+  arrange(HMPU_TARGETS, Year) |> 
+  mutate(
+    progress = cumsum(progress),
+    .by = HMPU_TARGETS
+  ) |> 
+  full_join(strdat, by="HMPU_TARGETS") |> 
+  mutate(
+    progress = progress + start
+  ) 
 
