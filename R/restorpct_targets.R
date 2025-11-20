@@ -181,12 +181,13 @@ curdat <- read.csv(pth, stringsAsFactors = F) %>%
     HMPU_TARGETS == "Intertidal Estuarine (Other)" ~ "Total Intertidal",
     TRUE ~ HMPU_TARGETS
   )) |> 
+  filter(HMPU_TARGETS != 'Total Intertidal') |> 
   summarise(
     Acres = sum(Acres, na.rm=TRUE),
     Miles = sum(Miles, na.rm=TRUE),
     .by=c(Year, HMPU_TARGETS)
   ) |> 
-  tidyr::complete(Year = 2017:2025, HMPU_TARGETS, fill=list(Acres=0, Miles=0)) |> 
+  tidyr::complete(Year, HMPU_TARGETS = strdat$HMPU_TARGETS, fill=list(Acres=0, Miles=0)) |> 
   mutate(
     progress = case_when(
       HMPU_TARGETS %in% c('Tidal Tributaries', 'Living Shorelines') ~ Miles, 
