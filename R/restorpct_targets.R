@@ -118,16 +118,26 @@ trgshr <- trgs |>
 
 pth <- 'https://raw.githubusercontent.com/tbep-tech/TBEP_Habitat_Restoration/main/restoration.csv'
 
+subtdcat <- c('Seagrasses', 'Oyster Bars', 'Tidal Flats')
+nodatcat <- c('Artificial Reefs', 'Hard Bottom', 'Tidal Tributaries', 'Living Shorelines')
+updatcat <- c('Mangrove Forests', 'Salt Barrens', 'Salt Marshes', 'Coastal Uplands', 
+  'Non-Forested Freshwater Wetlands', 'Forested Freshwater Wetlands', 
+  'Native Uplands')
+
+subtdyr <- 2024
+nodatyr <- 2017
+updatyr <- 2023
+
 # starting restoration data for 2017 (inter/supratidal) and 2018 (subtidal)
 strdat <- bind_rows(
-    filter(acres, name == 2017),
-    filter(subtacres, name == 2018)
+    filter(acres, name == updatyr),
+    filter(subtacres, name == subtdyr)
   ) |>
   ungroup() |> 
   select(-name) |> 
   rbind(
     tibble(
-      HMPU_TARGETS = c('Artificial Reefs', 'Hard Bottom', 'Tidal Tributaries', 'Living Shorelines'),
+      HMPU_TARGETS = nodatcat,
       Acres = c(166, 423, 387, 11.3)
     )
   ) |> 
@@ -136,7 +146,7 @@ strdat <- bind_rows(
 
 # currrent restoration data since 2017
 curdat <- read.csv(pth, stringsAsFactors = F) |> 
-  filter(GeneralActivity == 'Restoration' & Federal_Fiscal_Year >= 2017) |>
+  filter(GeneralActivity == 'Restoration' & Federal_Fiscal_Year >= nodatyr) |>
   select(
     Year = Federal_Fiscal_Year,
     HMPU_TARGETS = PrimaryHabitat,
@@ -166,7 +176,7 @@ curdat <- read.csv(pth, stringsAsFactors = F) |>
     .by=c(Year, HMPU_TARGETS)
   ) 
 
-# current restoration progress based on 2017 starting for inter/supratidal, 2018 for subtidal
+# current restoration progress based on 2023 for inter/supratidal, 2024 for subtidal, 2017 for categories not in lu data
 prgdat <- curdat |> 
   tidyr::complete(Year, HMPU_TARGETS = strdat$HMPU_TARGETS, fill=list(Acres=0, Miles=0)) |> 
   mutate(
@@ -176,7 +186,11 @@ prgdat <- curdat |>
     )
   ) |> 
   select(-Miles, -Acres) |> 
-  filter(!(HMPU_TARGETS %in% c('Artificial Reefs', 'Oyster Bars', 'Hard Bottom', 'Seagrasses', 'Tidal Flats') & Year == 2017)) |> 
+  filter(
+    (HMPU_TARGETS %in% nodatcat & Year >= nodatyr) |
+    (HMPU_TARGETS %in% updatcat & Year >= updatyr) |
+    (HMPU_TARGETS %in% subtdcat & Year >= subtdyr)
+  ) |> 
   arrange(HMPU_TARGETS, Year) |> 
   mutate(
     progress = cumsum(progress),
