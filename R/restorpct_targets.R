@@ -128,7 +128,8 @@ subtdyr <- 2024
 nodatyr <- 2017
 updatyr <- 2023
 
-# starting restoration data for 2017 (inter/supratidal) and 2018 (subtidal)
+# starting restoration data for 2023 (inter/supratidal) and 2024 (subtidal)
+# manually add 2017 for not tracked
 strdat <- bind_rows(
     filter(acres, name == updatyr),
     filter(subtacres, name == subtdyr)
