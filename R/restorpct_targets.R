@@ -5,6 +5,7 @@ library(here)
 library(sf)
 library(mapedit)
 library(mapview)
+library(readr)
 
 source(here('R/funcs.R'))
 
@@ -138,3 +139,5 @@ rsttrg <- curmet |>
   select(-Target2030) |>
   full_join(tnddat, by="HMPU_TARGETS") |>
   select(HMPU_TARGETS,Target2030,Year,everything() & -data)
+
+write.csv(rsttrg,here("docs","restoration_targets.csv"))
