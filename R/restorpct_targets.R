@@ -7,107 +7,8 @@ library(mapedit)
 library(mapview)
 
 source(here('R/funcs.R'))
-crtyr="2025" #most recent year of restoration data available
-yrstogo="5" #years to go in current restoration plan (2030-crtyr)
 
-# simple version of all restoration projects --------------------------------------------------
-
-# from https://github.com/tbep-tech/TBEP_Habitat_Restoration
-pth <- 'https://raw.githubusercontent.com/tbep-tech/TBEP_Habitat_Restoration/main/restoration.csv'
-
-rstdatall <- read.csv(pth, stringsAsFactors = F) %>% 
-  select(
-    Year = Federal_Fiscal_Year,
-    Partner = Lead_Implementer,
-    Lat = Latitude, 
-    Lon = Longitude,
-    Restoration_Technique,
-    Primary = PrimaryHabitat,
-    General = GeneralHabitat,
-    Activity = GeneralActivity,
-    Acres,
-    Miles,
-    Feet
-  ) %>%
-  mutate(
-    Miles = case_when(
-      Activity %in% 'Maintenance' & Restoration_Technique %in% 'Debris Removal' ~ NA_real_,
-      T ~ Miles
-    ),
-    Acres = as.numeric(Acres),
-    Miles = case_when(
-      is.na(Miles) & !is.na(Feet) ~ Feet / 5280,
-      T ~ Miles
-    ),
-    General = case_when(
-      General == 'estuarine' ~ 'Estuarine', 
-      grepl('^Upland', General) ~ 'Uplands',
-      grepl('^Mix|^Other', General) ~ 'Mixed', 
-      T ~ General
-    ), 
-    General = ifelse(General == '', NA, General),
-    Primary = ifelse(Primary == '', NA, Primary),
-    Activity = ifelse(Activity == '', NA, Activity)
-  ) %>% 
-  select(Year, Partner, Lat, Lon, Primary, General, Activity, Acres, Miles)
-
-save(rstdatall, file = here('data/rstdatall.RData'))
-
-#Calculating % annual restoration effort needed to meet 2030 targets------------
-# Download targets file
-download.file(
-  url = "https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/trgs.RData",
-  destfile = here("Data/trgs.RData")
-)
-load(url('https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/trgs.RData'))
-
-
-#summarize habitat restoration by habitat type for 2020-current year;
-data_filtered <- rstdatall%>%
-  filter(Year>= 2020 & Year <= 2025,
-         Activity=="Restoration")%>%
-  mutate(HMPU_TARGETS=Primary)%>%
-  mutate(HMPU_TARGETS = case_when(
-    HMPU_TARGETS == "Low-Salinity Salt Marsh" ~ "Salt Marshes",
-    HMPU_TARGETS == "Non-forested Freshwater Wetlands" ~ "Non-Forested Freshwater Wetlands",
-    HMPU_TARGETS == "Uplands (Non-coastal)" ~ "Native Uplands",
-    HMPU_TARGETS == "Intertidal Estuarine (Other)" ~ "Total Intertidal",
-    TRUE ~ HMPU_TARGETS
-  ))
-
-# Summary by habitat type
-habitat_summary <- data_filtered %>%
-  group_by(HMPU_TARGETS) %>%
-  summarise(
-    sum_acres=sum(Acres,na.rm=TRUE),
-    sum_miles=sum(Miles,na.rm=TRUE)
-  )
-
-habitat_crtyr <-data_filtered %>%
-  group_by(HMPU_TARGETS)%>%
-  filter(Year==crtyr,
-         Activity=="Restoration")
-
-# current year summary by habitat type
-habitat_summary_crtyr <- habitat_crtyr %>%
-  group_by(HMPU_TARGETS) %>%
-  summarise(
-    sum_acres_crt=sum(Acres,na.rm=TRUE),
-    sum_miles_crt=sum(Miles,na.rm=TRUE)
-  )
-
-# Keep all records from habitat_summary
-restored <- habitat_summary %>%
-  left_join(rsttargets, by = "HMPU_TARGETS")%>%
-  left_join(habitat_summary_crtyr, by = "HMPU_TARGETS")
-
-#Find acres/miles to go based on 2025 LULC
-
-restore_pct <- restored %>%
-  mutate(AcrestoGo=Target2030-(sum_acres+acres_LULC),
-         MilestoGo=Target2030-sum_miles)
-  
-# alternative approach ---------------------------------------------------
+# Load data ---------------------------------------------------
 
 load(url('https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/acres.RData'))
 load(url('https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/subtacres.RData'))
@@ -145,8 +46,13 @@ strdat <- bind_rows(
   rename(start = Acres) |> 
   filter(HMPU_TARGETS %in% c(trgshr$HMPU_TARGETS))
 
+#Bringing in restoration data archive and performing QA
+restdat <- read.csv(pth, stringsAsFactors = F) |>
+  #fixing mistake in restoration table, Perico Bayou oyster restoration in 2019, 300 acres is incorrect, 300ftX3.5ft~1000sqft or 0.02 acres
+  mutate(Acres=if_else(View_Detail==19688, 0.02, Acres))
+
 # currrent restoration data since 2017
-curdat <- read.csv(pth, stringsAsFactors = F) |> 
+curdat <- restdat |>
   filter(GeneralActivity == 'Restoration' & Federal_Fiscal_Year >= nodatyr) |>
   select(
     Year = Federal_Fiscal_Year,
@@ -203,7 +109,15 @@ prgdat <- curdat |>
   ) |> 
   select(-start)
 
-# 2030 estimate based on last five years, likel to meet as T/F
+#Current year progress met, 
+curmet <- prgdat |>
+  left_join(trgshr, by="HMPU_TARGETS") |> 
+  filter(Year == max(Year)) |>
+  mutate(
+    curmet = progress >= Target2030 
+  )
+
+# 2030 estimate based on last five years, likely to meet as T/F
 tnddat <- prgdat |> 
   filter(Year <= max(Year) & Year > (max(Year) - 5)) |> 
   nest(data = c(Year, progress)) |> 
@@ -219,3 +133,8 @@ tnddat <- prgdat |>
     estmet = est2030 >= Target2030
   )
 
+#Combine current year target met and 2030 estimate
+rsttrg <- curmet |>
+  select(-Target2030) |>
+  full_join(tnddat, by="HMPU_TARGETS") |>
+  select(HMPU_TARGETS,Target2030,Year,everything() & -data)
