@@ -65,6 +65,16 @@ restmap <- restdat_fun(restorelyr)
 
 st_write(restmap, here('data/restmap.shp'))
 
+# opportunity areas shapefile --------------------------------------------
+
+# copied by hand, this didnt work (couldn't read in file after copied)
+rt <- 'https://github.com/tbep-tech/hmpu-workflow/raw/refs/heads/master/data/shapefiles/oppmap'
+fls <- paste0(rt, c('.shp', '.shx', '.dbf', '.prj'))
+
+purrr::walk(fls, function(x){
+  download.file(x, here('data/', basename(x)))
+})
+
 # oyster hsi ----------------------------------------------------------------------------------
 
 pth <- 'T:/05_GIS/OYSTER_HSI/TampaBay_OysterIndex.gdb'
@@ -83,7 +93,7 @@ swfwmdtbsegcor <- editFeatures(swfwmdtbseg)
 
 save(swfwmdtbsegcor, file = here('data/swfwmdtbsegcor.RData'), compress = 'xz')
 
-  # SWFWMD oyster coverage by bay segment -------------------------------------------------------
+# SWFWMD oyster coverage by bay segment -------------------------------------------------------
 
 load(file = here('data/swfwmdtbsegcor.RData'))
 

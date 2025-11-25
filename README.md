@@ -8,6 +8,8 @@ Tables and figures: [link](https://tbep-tech.github.io/habitat-report-card/summa
 
 Restoration potential map: [link](https://tbep-tech.github.io/habitat-report-card/restpotential.html)
 
+Opportunity areas map: [link](https://tbep-tech.github.io/habitat-report-card/oppareas.html)
+
 Potential oyster restoration thresholds by bay segment: [link](https://tbep-tech.github.io/habitat-report-card/oysterthresh.html)
 
 Habitat Report Card Update: [link](https://tbep-tech.github.io/habitat-report-card/habitatreportupdates.html)

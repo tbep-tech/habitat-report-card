@@ -2,12 +2,7 @@
 
 library(tidyverse)
 library(here)
-library(sf)
-library(mapedit)
-library(mapview)
 library(readr)
-
-source(here('R/funcs.R'))
 
 # Load data ---------------------------------------------------
 
