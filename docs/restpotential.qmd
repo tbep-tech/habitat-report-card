@@ -10,14 +10,11 @@ format:
     code-tools: 
       source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/restpotential.qmd
     css: styles.css
+    page-layout: full
 
 execute:
   echo: false
   warning: false
-filters:
-  - lightbox
-
-lightbox: auto
 ---
 
 ```{r}
@@ -37,9 +34,10 @@ cols <- list(
   unlist()
 ```
 
-The map shows restoration potential for restorable habitats in the Tampa Bay Watershed.  Restorable lands are altered but non-hardened areas where restoration could support native habitats (e.g., fallow farm fields).  These lands are also currently acquired or protected by public agencies.  Restoration potential depends on soil type, soil salinity, and proximity to the coast.  
+The map shows restoration potential for restorable habitats in the Tampa Bay Watershed.  This information is provided to support habitat restoration and protection projects pursued by area partners in the Tampa Bay watershed.  Additional information about the methods used to define these areas can be found in the [Habitat Master Plan](https://tbep.org/habitat-master-plan-update){target="_blank"} and [Beck et al. 2023](https://doi.org/10.3389/fevo.2023.1070266){target="blank"}.  Restorable lands are altered but non-hardened areas where restoration could support native habitats (e.g., fallow farm fields).  These lands are also currently acquired or protected by public agencies.  Restoration potential depends on soil type, soil salinity, and proximity to the coast.  
 
 ```{r}
+#| fig-height: 8
 pal <- colorFactor(palette = cols, domain = names(cols))
 
 restmap |> 

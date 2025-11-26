@@ -10,14 +10,11 @@ format:
     code-tools: 
       source: https://github.com/tbep-tech/habitat-report-card/blob/master/docs/oppareas.qmd
     css: styles.css
+    page-layout: full
 
 execute:
   echo: false
   warning: false
-filters:
-  - lightbox
-
-lightbox: auto
 ---
 
 ```{r}
@@ -39,7 +36,7 @@ cols <- list(
     unlist()
 ```
 
-The map shows opportunity areas in the Tampa Bay Watershed.  The following definitions apply:
+The map shows opportunity areas in the Tampa Bay Watershed.  This information is provided to support habitat restoration and protection projects pursued by area partners in the Tampa Bay watershed.  Additional information about the methods used to define these areas can be found in the [Habitat Master Plan](https://tbep.org/habitat-master-plan-update){target="_blank"} and [Beck et al. 2023](https://doi.org/10.3389/fevo.2023.1070266){target="blank"}. The following definitions apply:
 
 | Opportunity Area | Description |
 |-----------------|-------------|
@@ -47,10 +44,11 @@ The map shows opportunity areas in the Tampa Bay Watershed.  The following defin
 | Existing conservation restorable | Restorable areas currently within existing conservation lands |
 | Proposed conservation native | Native habitats within proposed conservation lands |
 | Proposed conservation restorable | Restorable areas within proposed conservation lands |
-| Coastal reservation native | Native habitats within the coastal stratum |
-| Coastal reservation restorable | Restorable areas within the coastal stratum |
+| Reservation native | Native habitats within the coastal stratum |
+| Reservation restorable | Restorable areas within the coastal stratum |
 
 ```{r}
+#| fig-height: 8
 pal <- colorFactor(palette = cols, domain = names(cols))
 
 oppmap |> 
