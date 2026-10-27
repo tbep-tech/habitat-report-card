@@ -43,7 +43,7 @@ pal <- colorFactor(palette = cols, domain = names(cols))
 restmap |> 
   st_transform(crs = 4326) |> 
   leaflet() |> 
-  addProviderTiles("CartoDB.Positron") |> 
+  addProviderTiles("Esri.WorldGrayCanvas") |> 
   addPolygons(
     fillColor = ~pal(HMPU_TA),
     fillOpacity = 0.7,
