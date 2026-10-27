@@ -55,7 +55,7 @@ oppmap |>
   st_simplify(dTolerance = 100) |>
   st_transform(crs = 4326) |> 
   leaflet() |> 
-  addProviderTiles("CartoDB.Positron") |> 
+  addProviderTiles("Esri.WorldGrayCanvas") |> 
   addPolygons(
     fillColor = ~pal(cat),
     fillOpacity = 0.7,
