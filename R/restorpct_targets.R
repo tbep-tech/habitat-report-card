@@ -3,6 +3,7 @@
 library(tidyverse)
 library(here)
 library(readr)
+library(patchwork)
 
 # Load data ---------------------------------------------------
 
@@ -104,6 +105,8 @@ prgdat <- curdat |>
     progress = progress + start
   ) |> 
   select(-start)
+save(prgdat, file = here("docs", "prgdat.RData"))
+
 
 #Current year progress met, 
 curmet <- prgdat |>
@@ -136,3 +139,128 @@ rsttrg <- curmet |>
   select(HMPU_TARGETS,Target2030,Year,everything() & -data)
 
 write.csv(rsttrg,here("docs","restoration_targets.csv"))
+
+# restoration report card figure --------------------------------------------------------------------------
+
+# yearly status
+
+# for each habitat and year: target met that year, and 2030 estimate from a linear fit
+# to the last five years up to and including that year (same approach as tnddat)
+est2030 <- function(yr, prg) {
+  if (length(unique(yr)) < 2) return(tail(prg, 1))   # one year only, no trend yet
+  round(predict(lm(prg ~ yr), newdata = data.frame(yr = 2030)), 1)
+}
+
+rptdat <- prgdat |>
+  left_join(trgshr, by = 'HMPU_TARGETS') |>
+  arrange(HMPU_TARGETS, Year) |>
+  mutate(
+    est2030 = map_dbl(Year, \(y) {
+      sel <- Year <= y & Year > (y - 5)
+      est2030(Year[sel], progress[sel])
+    }),
+    .by = HMPU_TARGETS
+  ) |>
+  mutate(
+    curmet = progress >= Target2030,
+    estmet = est2030 >= Target2030
+  ) |>
+  filter(Year >= 2023)   # show 2023 on; earlier years are still used for the trends above
+
+# plot
+
+sub <- c('Tidal Flats', 'Seagrasses', 'Oyster Bars', 'Artificial Reefs', 'Hard Bottom')
+int <- c('Mangrove Forests', 'Salt Barrens', 'Salt Marshes', 'Tidal Tributaries', 'Living Shorelines')
+sup <- c('Coastal Uplands', 'Non-Forested Freshwater Wetlands',
+         'Forested Freshwater Wetlands', 'Native Uplands')
+
+# habitats flagged with an asterisk on the axis labels
+astr <- c('Artificial Reefs', 'Hard Bottom', 'Living Shorelines', 'Tidal Tributaries')
+habtlab <- function(h) ifelse(h %in% astr, paste0(h, '*'), h)
+
+cols <- c('2030 target not met' = '#CC3231', '2030 target met' = '#2DC938')
+trnds <- c('Trending above 2030 target' = 1, 'Trending below 2030 target' = 2)
+
+# x = habitat, y = year; arrow up-right if trending above target, down-right if below
+prep <- function(d, habs) {
+  d <- filter(d, HMPU_TARGETS %in% habs)
+  yrs <- sort(unique(d$Year))
+  d |>
+    mutate(
+      x = match(HMPU_TARGETS, habs),
+      y = match(Year, yrs),
+      trend = factor(ifelse(estmet, names(trnds)[1], names(trnds)[2]), levels = names(trnds)),
+      met = factor(ifelse(curmet, '2030 target met', '2030 target not met'), levels = names(cols)),
+      y0 = ifelse(estmet, y + 0.3, y - 0.3),   # y axis is reversed below
+      y1 = ifelse(estmet, y - 0.3, y + 0.3)
+    )
+}
+
+# legend key that draws a black up or down arrow
+draw_key_trend <- function(data, params, size) {
+  up <- data$shape == 1
+  grid::segmentsGrob(0.15, ifelse(up, 0.15, 0.85), 0.85, ifelse(up, 0.85, 0.15),
+                     arrow = arrow(type = 'closed', length = unit(0.08, 'inches')),
+                     gp = grid::gpar(col = 'black', fill = 'black', lwd = 5, linejoin = 'mitre', lineend = 'round'))
+}
+
+arrw <- arrow(type = 'closed', length = unit(0.1, 'inches'), angle = 30)
+
+lyrs <- list(
+  geom_segment(aes(x = x - 0.3, xend = x + 0.3, y = y0, yend = y1, color = met),
+               linewidth = 2, lineend = 'round', linejoin = 'mitre', arrow = arrw,
+               key_glyph = 'rect'),
+  geom_point(aes(x = x, y = y, shape = trend), alpha = 0, key_glyph = draw_key_trend),
+  scale_shape_manual(values = trnds, drop = FALSE, name = NULL),
+  scale_color_manual(values = cols, drop = FALSE, name = NULL)
+)
+
+yscl <- function(d) scale_y_reverse(breaks = sort(unique(d$y)), labels = sort(unique(d$Year)),
+                                    expand = expansion(add = 0.5))
+
+thm <- theme_bw(base_size = 14) +
+  theme(
+    panel.grid = element_blank(),
+    panel.border = element_rect(color = 'black', linewidth = 1),
+    panel.spacing = unit(0, 'lines'),
+    axis.title = element_blank(),
+    axis.text.x.top = element_text(angle = 45, hjust = 0, vjust = 0),
+    strip.background = element_blank(),
+    strip.placement = 'outside',
+    strip.text = element_text(size = 14),
+    plot.margin = margin(5, 60, 5, 5)
+  )
+
+# subtidal panel
+dsub <- prep(rptdat, sub)
+p1 <- ggplot(dsub) +
+  lyrs +
+  scale_x_continuous(breaks = seq_along(sub), labels = habtlab(sub), limits = c(0.5, length(sub) + 0.5),
+                     position = 'top', expand = c(0, 0)) +
+  yscl(dsub) +
+  facet_grid(~'Subtidal', switch = 'x') +
+  thm
+
+# intertidal + supratidal panel
+habs2 <- c(int, sup)
+dint <- prep(rptdat, habs2) |>
+  mutate(cat = factor(ifelse(HMPU_TARGETS %in% int, 'Intertidal', 'Supratidal'),
+                      levels = c('Intertidal', 'Supratidal')))
+p2 <- ggplot(dint) +
+  lyrs +
+  scale_x_continuous(breaks = seq_along(habs2), labels = habtlab(habs2),
+                     position = 'top', expand = expansion(add = 0.5)) +
+  yscl(dint) +
+  facet_grid(~cat, scales = 'free_x', space = 'free_x', switch = 'x') +
+  thm
+
+p <- p1 + p2 +
+  plot_layout(widths = c(length(sub), length(habs2)), guides = 'collect') &
+  theme(legend.position = 'bottom', legend.text = element_text(size = 14),
+        legend.key.size = unit(0.35, 'inches'))
+
+p
+
+png(here('docs/figs/hmpreport_rest.png'), height = 6.5, width = 13, units = 'in', res = 500)
+print(p)
+dev.off()
