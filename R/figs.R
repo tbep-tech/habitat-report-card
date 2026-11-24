@@ -474,10 +474,14 @@ tomap <- rstdatall %>%
   )
 
 m <- ggplot() + 
-  ggspatial::annotation_map_tile(zoom = 9, type = 'cartolight', cachedir = system.file("rosm.cache", package = "ggspatial")) + 
+  ggspatial::annotation_map_tile(
+    zoom = 9, 
+    type = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/${z}/${y}/${x}.jpeg',
+    cachedir = tempdir()
+  ) + 
   annotation_north_arrow(location = 'tl', style = north_arrow_orienteering(fill = c('black', 'black'), text_col = NA)) +
-  annotation_scale(location = 'br', text_cex = 1.5,) +
-  geom_sf(data= tbshed, fill = 'grey', color = 'darkgrey', inherit.aes = F, alpha = 0.5, linewidth = 1.5) +
+  annotation_scale(location = 'br', text_cex = 1.5) +
+  geom_sf(data = tbshed, fill = NA, color = 'darkgrey', inherit.aes = F, linewidth = 1.5) +
   geom_sf(data = tomap, aes(fill = filcol), color = 'black', pch = 21, inherit.aes = F, size = 4) +
   scale_fill_manual(values = c('#00806E', '#958984')) +
   theme(
@@ -488,8 +492,9 @@ m <- ggplot() +
     panel.background = element_rect(fill = NA, color = 'black'), 
     legend.position = c(1, 1), 
     legend.justification = c(1, 0.85), 
-    legend.background = element_rect(fill = NA, color = NA)
-  ) + 
+    legend.background = element_rect(fill = NA, color = NA),
+    legend.key = element_blank()
+  ) +
   labs(
     subtitle = paste0('Project locations in the watershed (1971-', cur, ')'), 
     fill = NULL
