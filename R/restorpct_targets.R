@@ -136,7 +136,8 @@ tnddat <- prgdat |>
 rsttrg <- curmet |>
   select(-Target2030) |>
   full_join(tnddat, by="HMPU_TARGETS") |>
-  select(HMPU_TARGETS,Target2030,Year,everything() & -data)
+  select(HMPU_TARGETS,Target2030,Year,everything() & -data)|>
+  mutate(ToGo=Target2030-progress)
 
 write.csv(rsttrg,here("docs","restoration_targets.csv"))
 
