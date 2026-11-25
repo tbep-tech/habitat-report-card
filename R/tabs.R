@@ -17,6 +17,13 @@ load(file = here('data/rstdatall.RData'))
 # maximum year
 cur <- max(rstdatall$Year)
 
+# list partners for current year -----------------------------------------------
+curyr <- rstdatall %>%
+  filter(Year==cur)%>%
+  group_by(Partner)%>%
+  count(Partner, sort=TRUE)
+write.csv(curyr,here("docs","annual_projects_partners.csv"))
+
 # compiled habitat tables ---------------------------------------------------------------------
 
 # general and primary
